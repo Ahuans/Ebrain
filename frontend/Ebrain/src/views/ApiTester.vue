@@ -18,18 +18,37 @@
       <el-button type="primary" @Click="AccessAPI">Go</el-button>
     </el-col>
   </el-row>
+  <el-row>
+    <el-col> <p>Result</p></el-col>
+  </el-row>
+  <el-row>
+    <el-col>
+      <el-input
+        type="textarea"
+        v-model="result"
+        :autosize="{
+          minRows: 40,
+          maxRows: 40
+        }"
+        disabled
+      >{{ result }}
+      </el-input>
+    </el-col>
+  </el-row>
 </template>
 
 <style></style>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { API_METHOD } from '../constant/methods'
 import axios from 'axios'
 export default {
   setup(props, ctx) {
     let targetURL = ref('')
     let method = ref('')
+    let header = reactive({})
+    let result = ref('')
     onMounted(() => {
       console.log('Mounted')
       method.value = API_METHOD[0].value
@@ -37,22 +56,26 @@ export default {
 
     async function AccessAPI() {
       let response = await axios({
-        headers: { 
-          "content-type" : "text/plain",
-          'Access-Control-Allow-Origin': '*'
+        headers: {
+          'content-type': 'application/json'
         },
-        method: method.value,
-        url: targetURL.value,
-        data: {}
+        method: 'post',
+        url: 'http://localhost:3000/api',
+        data: {
+          header: header.value,
+          url: targetURL.value,
+          method: method.value
+        }
       })
-      console.log(response.data)
+      result.value=response.data.data
     }
 
     return {
       targetURL,
       method,
       API_METHOD,
-      AccessAPI
+      AccessAPI,
+      result
     }
   }
 }

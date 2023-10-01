@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express();
-
+const axios = require('axios');
 
 const PORT = 3000;
 
@@ -24,8 +24,30 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.get("/api",(req,res)=>{
-    res.send("Hello")
+
+app.post("/api",async (req,res)=>{
+    console.log("GET")
+    try {
+        if(req){
+            console.log(req.body)
+        }
+
+        let response = await axios({
+            headers:req.body.header,
+            url:req.body.url,
+            data:req.body.data
+        })
+
+        console.log(response.headers)
+
+        res.status(200).json({
+            header:response.headers,
+            data:response.data
+        })   
+    } catch (error) {
+        console.log(error)
+        res.sendStatus(500)
+    }
 })
 
 app.listen(PORT, function () {
