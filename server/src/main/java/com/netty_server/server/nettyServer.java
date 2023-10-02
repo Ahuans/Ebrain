@@ -1,19 +1,15 @@
-package com.whx.netty_server.server;
+package com.netty_server.server;
 
-import java.lang.invoke.ConstantCallSite;
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.CreateMode;
 
-import com.whx.netty_server.constants.Constants;
-import com.whx.netty_server.factory.ZookeeperFactory;
-import com.whx.netty_server.handler.SimpleServerHandler;
+import com.netty_server.constants.Constants;
+import com.netty_server.factory.ZookeeperFactory;
+import com.netty_server.handler.SimpleServerHandler;
 
-import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -28,7 +24,6 @@ import io.netty.handler.codec.Delimiters;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.AttributeKey;
 
 /**
  * Hello world!
@@ -68,7 +63,6 @@ public class nettyServer
 			int port=8082;
 			curatorFramework.create().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(Constants.Server_PATH+"/"+inetAddress.getHostAddress()+"#"+port+"#");
 			f.channel().closeFuture().sync();
-			
 			} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

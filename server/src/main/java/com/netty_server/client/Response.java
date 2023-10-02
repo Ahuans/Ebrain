@@ -1,4 +1,4 @@
-package com.whx.netty_server.client;
+package com.netty_server.client;
 
 public class Response {
 	private Long id;

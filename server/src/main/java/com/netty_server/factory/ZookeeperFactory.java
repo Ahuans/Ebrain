@@ -1,4 +1,4 @@
-package com.whx.netty_server.factory;
+package com.netty_server.factory;
 
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;

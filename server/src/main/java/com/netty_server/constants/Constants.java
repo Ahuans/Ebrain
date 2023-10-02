@@ -1,4 +1,4 @@
-package com.whx.netty_server.constants;
+package com.netty_server.constants;
 
 import java.net.InetAddress;
 
