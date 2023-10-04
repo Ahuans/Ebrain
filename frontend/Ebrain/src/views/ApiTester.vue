@@ -1,4 +1,5 @@
 <template>
+  <!--Input preview area -->
   <el-row :gutter="20">
     <el-col :span="2">
       <el-select v-model="method" placeholder="method">
@@ -18,6 +19,8 @@
       <el-button type="primary" @Click="AccessAPI">Go</el-button>
     </el-col>
   </el-row>
+
+<!--Result preview area -->
   <el-row>
     <el-col> <p>Result</p></el-col>
   </el-row>
@@ -31,7 +34,7 @@
           maxRows: 40
         }"
         disabled
-      >{{ result }}
+      >
       </el-input>
     </el-col>
   </el-row>
@@ -41,7 +44,7 @@
 
 <script>
 import { ref, onMounted, reactive } from 'vue'
-import { API_METHOD } from '../constant/methods'
+import { API_METHOD, API_SERVER_URL } from '../constant/constant'
 import axios from 'axios'
 export default {
   setup(props, ctx) {
@@ -60,14 +63,25 @@ export default {
           'content-type': 'application/json'
         },
         method: 'post',
-        url: 'http://localhost:3000/api',
+        url: API_SERVER_URL,
         data: {
           header: header.value,
           url: targetURL.value,
           method: method.value
         }
       })
-      result.value=response.data.data
+
+      result.value = response.data.data
+      console.log(response.data.header['content-type'])
+      console.log(result.value)
+    }
+
+    //@format: string
+    function ParseData(format) {
+      //todo
+      format = format.match('\/{1}([a-zA-Z]*)')
+      //html
+      //js
     }
 
     return {
