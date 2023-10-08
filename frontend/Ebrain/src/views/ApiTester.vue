@@ -2,7 +2,7 @@
   <!--Input preview area -->
   <el-row :gutter="20">
     <el-col :span="2">
-      <el-select v-model="method" placeholder="method">
+      <el-select v-model="selected_API_Method" placeholder="method">
         <el-option
           v-for="item in API_METHOD"
           :key="item.value"
@@ -19,8 +19,20 @@
       <el-button type="primary" @Click="AccessAPI">Go</el-button>
     </el-col>
   </el-row>
-
-<!--Result preview area -->
+  <el-row>
+    <el-col>
+      <el-tabs v-model="tabActiveName" class="Params" @tab-click="">
+        <el-tab-pane label="Header" name="Header">Header</el-tab-pane>
+        <el-tab-pane label="Query" name="Query">
+          <!--Query area -->
+          <el-button type="primary" @click="AddData(queryTable)">Add</el-button>
+          <DataEntryTableComponent :dataArray="queryTable" />
+        </el-tab-pane>
+        <el-tab-pane label="Body" name="Body">Role</el-tab-pane>
+      </el-tabs>
+    </el-col>
+  </el-row>
+  <!--Result preview area -->
   <el-row>
     <el-col> <p>Result</p></el-col>
   </el-row>
@@ -43,19 +55,29 @@
 <style></style>
 
 <script>
-import { ref, onMounted, reactive } from 'vue'
+import { ref, reactive } from 'vue'
 import { API_METHOD, API_SERVER_URL } from '../constant/constant'
 import axios from 'axios'
+import DataEntryTableComponent from '../components/ApiViewComponents/DataEntryTableComponent.vue'
+
 export default {
+  components: {
+    DataEntryTableComponent
+  },
+
   setup(props, ctx) {
     let targetURL = ref('')
-    let method = ref('')
+    let selected_API_Method = ref('')
     let header = reactive({})
     let result = ref('')
-    onMounted(() => {
-      console.log('Mounted')
-      method.value = API_METHOD[0].value
-    })
+    let tabActiveName = ref('Header')
+    let queryTable = ref([
+      {
+        // test only
+        name: 'ask',
+        value: '123'
+      }
+    ])
 
     async function AccessAPI() {
       let response = await axios({
@@ -67,7 +89,7 @@ export default {
         data: {
           header: header.value,
           url: targetURL.value,
-          method: method.value
+          method: selected_API_Method.value
         }
       })
 
@@ -83,14 +105,29 @@ export default {
       //html
       //js
     }
+    //@dataSource:Array
+    function AddData(dataSource) {//todo
+      console.log(dataSource)
+      dataSource.push({
+        name: 'ask123',
+        value: '123123'
+      })
+    }
 
     return {
       targetURL,
-      method,
-      API_METHOD,
+      selected_API_Method,
       AccessAPI,
-      result
+      result,
+      tabActiveName,
+      queryTable,
+      API_METHOD,
+      AddData
     }
+  },
+  mounted() {
+    console.log('Mounted')
+    this.selected_API_Method = API_METHOD[0]
   }
 }
 </script>
