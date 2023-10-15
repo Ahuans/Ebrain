@@ -62,7 +62,7 @@
 
 <script>
 import { ref, reactive } from 'vue'
-import { API_METHOD, API_SERVER_URL } from '../constant/constant'
+import { API_METHOD, API_SERVER_URL, HEADER_NAMES} from '../constant/constant'
 import axios from 'axios'
 import DataEntryTableComponent from '../components/ApiViewComponents/DataEntryTableComponent.vue'
 
@@ -83,11 +83,7 @@ export default {
         value:"application/json"
       }
     ])
-    let headerNameSuggestion=ref([
-      {value:'c'},
-      {value:'a'},
-      {value:'b'},
-  ])
+    let headerNameSuggestion=ref([])
     let queryTable = ref([
       {
         // test only
@@ -148,6 +144,7 @@ export default {
   mounted() {
     console.log('Mounted')
     this.selected_API_Method = API_METHOD[0]
+    this.headerNameSuggestion = HEADER_NAMES
   }
 }
 </script>

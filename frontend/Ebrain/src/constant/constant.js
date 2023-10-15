@@ -13,6 +13,19 @@ const API_METHOD = [
     },
 ]
 
+
+const HEADER_NAMES=[
+    {value:"Content-Type"},
+    {value:"Accept"},
+    {value:"Authorization"},
+    {value:"Accept-Encoding"},
+    {value:"Accept-Language"},
+    {value:"User-Agent"},
+    {value:"If-Modified-Since"},
+
+]
+
 const API_SERVER_URL= "http://localhost:3000/api"
 
-export {API_METHOD,API_SERVER_URL}
+
+export {API_METHOD,API_SERVER_URL,HEADER_NAMES}
