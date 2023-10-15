@@ -22,13 +22,19 @@
   <el-row>
     <el-col>
       <el-tabs v-model="tabActiveName" class="Params" @tab-click="">
-        <el-tab-pane label="Header" name="Header">Header</el-tab-pane>
+        <el-tab-pane label="Header" name="Header">
+          <el-button type="primary" @click="AddData(headerTable)">Add</el-button>
+          <DataEntryTableComponent :nameSuggestion="headerNameSuggestion" :dataArray="headerTable" />
+        </el-tab-pane>
         <el-tab-pane label="Query" name="Query">
           <!--Query area -->
           <el-button type="primary" @click="AddData(queryTable)">Add</el-button>
           <DataEntryTableComponent :dataArray="queryTable" />
         </el-tab-pane>
-        <el-tab-pane label="Body" name="Body">Role</el-tab-pane>
+        <el-tab-pane label="Body" name="Body">
+          <el-button type="primary" @click="AddData(bodyTable)">Add</el-button>
+          <DataEntryTableComponent :dataArray="bodyTable" />
+        </el-tab-pane>
       </el-tabs>
     </el-col>
   </el-row>
@@ -71,6 +77,17 @@ export default {
     let header = reactive({})
     let result = ref('')
     let tabActiveName = ref('Header')
+    let headerTable = ref([
+      {
+        name:"content-type",
+        value:"application/json"
+      }
+    ])
+    let headerNameSuggestion=ref([
+      {value:'c'},
+      {value:'a'},
+      {value:'b'},
+  ])
     let queryTable = ref([
       {
         // test only
@@ -78,13 +95,13 @@ export default {
         value: '123'
       }
     ])
-
+    let bodyTable = ref([])
     async function AccessAPI() {
       let response = await axios({
         headers: {
           'content-type': 'application/json'
         },
-        method: 'post',
+        method: 'get',
         url: API_SERVER_URL,
         data: {
           header: header.value,
@@ -109,8 +126,8 @@ export default {
     function AddData(dataSource) {//todo
       console.log(dataSource)
       dataSource.push({
-        name: 'ask123',
-        value: '123123'
+        name: '',
+        value: ''
       })
     }
 
@@ -122,7 +139,10 @@ export default {
       tabActiveName,
       queryTable,
       API_METHOD,
-      AddData
+      AddData,
+      headerNameSuggestion,
+      headerTable,
+      bodyTable
     }
   },
   mounted() {

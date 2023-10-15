@@ -25,7 +25,7 @@ app.use(function (req, res, next) {
 });
 
 
-app.post("/api",async (req,res)=>{
+app.get("/api",async (req,res)=>{
     console.log("GET")
     try {
         if(req){
