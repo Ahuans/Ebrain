@@ -1,6 +1,5 @@
 package com.netty_server.client;
 
-import java.util.HashSet;
 import java.util.List;
 
 import com.netty_server.constants.Constants;
@@ -8,12 +7,13 @@ import com.netty_server.factory.ZookeeperFactory;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
 
 
 import io.netty.channel.ChannelFuture;
 
 public class ServerWathcer implements CuratorWatcher {
+
+
 
 	@Override
 	public void process(WatchedEvent event) throws Exception {

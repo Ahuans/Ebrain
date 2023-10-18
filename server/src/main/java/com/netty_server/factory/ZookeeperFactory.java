@@ -7,18 +7,21 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 
 public class ZookeeperFactory {
 	public static CuratorFramework client;
-	public static CuratorFramework create()
-	{
+
+	// when user input the zookeeper Address you need to use function below to connect zookeeper
+	public synchronized static void initialCreate(String zookeeperAddress) {
+
+			RetryPolicy retryPolicy=new ExponentialBackoffRetry(1000, 3);
+			client=CuratorFrameworkFactory.newClient(zookeeperAddress, retryPolicy);
+			client.start();
+
+	}
+	public static CuratorFramework create () throws Exception {
 		if(client==null)
 		{
-			RetryPolicy retryPolicy=new ExponentialBackoffRetry(1000, 3);
-			client=CuratorFrameworkFactory.newClient("localhost:2181", retryPolicy);
-			client.start();
+			throw new Exception("未连接到zookeeper服务器");
 		}
-		return client;
+		return  client;
 	}
-//	public static void main(String[] args) throws Exception {
-//		CuratorFramework clientCuratorFramework=create();
-//		clientCuratorFramework.create().forPath("/netty");
-//	}
+
 }

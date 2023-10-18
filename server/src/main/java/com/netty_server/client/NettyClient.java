@@ -41,11 +41,13 @@ public class NettyClient {
         });
 
         // Start the client.
-        CuratorFramework curatorFramework=ZookeeperFactory.create();
+
         try {
+            CuratorFramework curatorFramework=ZookeeperFactory.create();
             List<String> serverPaths=curatorFramework.getChildren().forPath(Constants.Server_PATH);
             //加上zk监听服务器变化
             CuratorWatcher watcher=new ServerWathcer();
+
             curatorFramework.getChildren().usingWatcher(watcher).forPath(Constants.Server_PATH);
 
             for(String serverPath:serverPaths)
