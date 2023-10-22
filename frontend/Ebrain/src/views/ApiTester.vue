@@ -24,7 +24,10 @@
       <el-tabs v-model="tabActiveName" class="Params" @tab-click="">
         <el-tab-pane label="Header" name="Header">
           <el-button type="primary" @click="AddData(headerTable)">Add</el-button>
-          <DataEntryTableComponent :nameSuggestion="headerNameSuggestion" :dataArray="headerTable" />
+          <DataEntryTableComponent
+            :nameSuggestion="headerNameSuggestion"
+            :dataArray="headerTable"
+          />
         </el-tab-pane>
         <el-tab-pane label="Query" name="Query">
           <!--Query area -->
@@ -62,7 +65,7 @@
 
 <script>
 import { ref, reactive } from 'vue'
-import { API_METHOD, API_SERVER_URL, HEADER_NAMES} from '../constant/constant'
+import { API_METHOD, API_SERVER_URL, HEADER_NAMES } from '../constant/constant'
 import axios from 'axios'
 import DataEntryTableComponent from '../components/ApiViewComponents/DataEntryTableComponent.vue'
 
@@ -74,16 +77,15 @@ export default {
   setup(props, ctx) {
     let targetURL = ref('')
     let selected_API_Method = ref('')
-    let header = reactive({})
     let result = ref('')
     let tabActiveName = ref('Header')
     let headerTable = ref([
       {
-        name:"content-type",
-        value:"application/json"
+        name: 'content-type',
+        value: 'application/json'
       }
     ])
-    let headerNameSuggestion=ref([])
+    let headerNameSuggestion = ref([])
     let queryTable = ref([
       {
         // test only
@@ -92,23 +94,51 @@ export default {
       }
     ])
     let bodyTable = ref([])
-    async function AccessAPI() {
-      let response = await axios({
-        headers: {
-          'content-type': 'application/json'
-        },
-        method: 'get',
-        url: API_SERVER_URL,
-        data: {
-          header: header.value,
-          url: targetURL.value,
-          method: selected_API_Method.value
-        }
+    /*
+    @table is json
+    @return a json object 
+    */
+    function TableToJson(table) {
+      let res = {}
+      table.forEach((record) => {
+        let recordName = record.name
+        let recordValue = record.value
+        res[recordName] = recordValue
+        console.log(res)
       })
+      return res
+    }
 
-      result.value = response.data.data
-      console.log(response.data.header['content-type'])
-      console.log(result.value)
+    async function AccessAPI() {
+      let header = TableToJson(headerTable.value)
+      let body = TableToJson(bodyTable.value)
+      // add queryparams to url todo later
+      let ParamsJson = TableToJson(queryTable.value)
+      const urlParams = new URLSearchParams(ParamsJson).toString()
+      console.log(targetURL.value+"?"+urlParams)
+      //
+
+      try {
+        let response = await axios({
+          headers: {
+            'content-type': 'application/json'
+          },
+          method: 'post',
+          url: API_SERVER_URL,
+          data: {
+            header: header,
+            url: targetURL.value+"?"+urlParams,
+            method: selected_API_Method.value['value'],
+            restBody: body
+          }
+        })
+
+        result.value = response.data.data
+        console.log(response.data.header['content-type'])
+        console.log(result.value)
+      } catch (error) {
+        console.log(error)
+      }
     }
 
     //@format: string
@@ -119,7 +149,8 @@ export default {
       //js
     }
     //@dataSource:Array
-    function AddData(dataSource) {//todo
+    function AddData(dataSource) {
+      //todo
       console.log(dataSource)
       dataSource.push({
         name: '',
@@ -138,7 +169,8 @@ export default {
       AddData,
       headerNameSuggestion,
       headerTable,
-      bodyTable
+      bodyTable,
+      TableToJson
     }
   },
   mounted() {

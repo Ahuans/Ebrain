@@ -46,7 +46,7 @@ export default {
     }
 
     function QuerySearch(queryString, callback) {
-      if(props.nameSuggestion.length===0){return;}
+      if( !props.nameSuggestion || props.nameSuggestion.length===0){return;}
       const res = queryString
         ? props.nameSuggestion.filter((suggestion) => {
           suggestion.value.toLowerCase() === queryString.toLowerCase()
