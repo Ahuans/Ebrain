@@ -8,6 +8,8 @@ import org.apache.zookeeper.CreateMode;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /*
 if you want to input any whole format like ip:port, please replace input with string: ip+#+port+#
@@ -15,7 +17,7 @@ and all parameter 'parent' is the name of parent node
  */
 public class ZooOp {
 
-
+    private static final Logger logger = LogManager.getLogger(ZooOp.class);
 
 
     static CuratorFramework curatorFramework;// zookeeper embody itself in java by using curatorFramwork
@@ -35,10 +37,26 @@ public class ZooOp {
     //log in the ip and port on the zookeeper, may throw exception
     public static void zooAddChild(String parent,String ip,int port) throws Exception {
         InetAddress inetAddress = InetAddress.getByName(ip);
-        curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath(parent+"/"+inetAddress.getHostAddress()+"#"+port+"#");
+        try
+        {
+            curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath(parent+"/"+inetAddress.getHostAddress()+"#"+port+"#");
+        }
+        catch (Exception e)
+        {
+            logger.info("ERROR:"+e.getMessage());
+            throw e;
+        }
+        logger.info("create node:"+parent+"/"+inetAddress.getHostAddress()+"#"+port+"#");
     }
     public static void zooAddParent(String parent) throws Exception {
-        curatorFramework.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(parent);
+        try {
+            curatorFramework.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(parent);
+        }catch (Exception e)
+        {
+            logger.info("ERROR:"+e.getMessage());
+            throw e;
+        }
+        logger.info("create parent node:"+parent+"/");
     }
 
 
@@ -51,6 +69,7 @@ public class ZooOp {
         try {
             serverPaths = curatorFramework.getChildren().forPath(parent);
         } catch (Exception e) {
+            logger.info("ERROR:"+e.getMessage());
             throw new RuntimeException(e);
         }
         if(address.equals("all"))
@@ -71,29 +90,53 @@ public class ZooOp {
 
     //ip address may throw the NoSuchAddress exception
     public static void zooRemove(String parent,String address) throws Exception {
-        curatorFramework.delete().forPath(parent+"/"+address);
+        try{
+            curatorFramework.delete().forPath(parent+"/"+address);
+        }
+        catch (Exception e)
+        {
+            logger.info("ERROR:"+e.getMessage());
+            throw  e;
+        }
+        logger.info("delete node:"+parent+"/"+address);
     }
     public static void zooRemoveParent(String parent) throws Exception {
-        curatorFramework.delete().deletingChildrenIfNeeded().forPath(parent);
+        try {
+            curatorFramework.delete().deletingChildrenIfNeeded().forPath(parent);
+        }catch (Exception e)
+        {
+            logger.info("ERROR:"+e.getMessage());
+            throw e;
+        }
+        logger.info("delete parent node:"+parent+"/");
     }
     public static void zooRemoveChildren(String parent) throws Exception {
         List<String> serverPaths= null;
         try {
             serverPaths = curatorFramework.getChildren().forPath(parent);
         } catch (Exception e) {
+            logger.info("ERROR:"+e.getMessage());
             throw new RuntimeException(e);
         }
         for(String s:serverPaths)
         {
             curatorFramework.delete().forPath(parent+"/"+s);
+            logger.info("delete node:"+parent+"/"+s);
         }
     }
     //ip address may throw the NoSuchAddress exception
     public static void zooChange(String parent,String addressBefore,String addressAfter) throws Exception {
 
-        curatorFramework.delete().forPath(Constants.Server_PATH+"/"+addressBefore);
-        String[] address=addressAfter.split("#");
-        InetAddress inetAddress = InetAddress.getByName(address[0]);
-        curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath(parent+"/"+inetAddress.getHostAddress()+"#"+Integer.valueOf(address[1])+"#");
+        try {
+            curatorFramework.delete().forPath(parent + "/" + addressBefore);
+            String[] address = addressAfter.split("#");
+            InetAddress inetAddress = InetAddress.getByName(address[0]);
+            curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath(parent + "/" +  addressAfter);
+        }catch (Exception e)
+        {
+            logger.info("ERROR:"+e.getMessage());
+            throw  e;
+        }
+        logger.info("change node "+parent + "/" + addressBefore+"to "+parent + "/" +  addressAfter);
     }
 }
