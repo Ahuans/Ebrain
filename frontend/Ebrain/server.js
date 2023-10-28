@@ -25,6 +25,7 @@ app.use(function (req, res, next) {
 
 app.post('/api', async (req, res) => {
   console.log('Trigger')
+  let response;
   try {
     if (req) {
       console.log(req.body)
@@ -36,12 +37,14 @@ app.post('/api', async (req, res) => {
       method: req.body.method
     }
     if (axiosConfig.method != 'get') {
-      axiosConfig[data] = req.body.restBody
+      axiosConfig['data'] = req.body.restBody
     }
 
-    let response = await axios(axiosConfig)
+    console.log(axiosConfig)
 
-    console.log(response.headers)
+    response = await axios(axiosConfig)
+
+    console.log(response)
 
     res.status(200).json({
       header: response.headers,
@@ -49,9 +52,11 @@ app.post('/api', async (req, res) => {
     })
   } catch (error) {
     console.log(error)
-    res.sendStatus(500).json({ header: response.headers, data: response.data })
+    res.sendStatus(500)
   }
 })
+
+
 
 app.listen(PORT, function () {
   console.log('listening on ', PORT)

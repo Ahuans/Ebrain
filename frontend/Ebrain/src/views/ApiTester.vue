@@ -1,4 +1,16 @@
 <template>
+  <el-tabs
+    v-model="currentTabValue"
+    type="card"
+    editable
+    class="tabs"
+    @edit="HandleTabsEdit"
+    @click="SwtichTab"
+  >
+    <el-tab-pane v-for="tab in tabs" :key="tab.index" :label="tab.url" :name="tab.index">
+    </el-tab-pane>
+  </el-tabs>
+
   <!--Input preview area -->
   <el-row :gutter="20">
     <el-col :span="2">
@@ -43,7 +55,9 @@
   </el-row>
   <!--Result preview area -->
   <el-row>
-    <el-col> <p>Result</p></el-col>
+    <el-col>
+      <p>Result</p>
+    </el-col>
   </el-row>
   <el-row>
     <el-col>
@@ -75,6 +89,11 @@ export default {
   },
 
   setup(props, ctx) {
+    let tabs = ref([])
+    let currentTabValue = ref()
+
+    let currentTab = ref()
+
     let targetURL = ref('')
     let selected_API_Method = ref('')
     let result = ref('')
@@ -85,37 +104,41 @@ export default {
         value: 'application/json'
       }
     ])
-    let headerNameSuggestion = ref([])
-    let queryTable = ref([
-      {
-        // test only
-        name: 'ask',
-        value: '123'
-      }
-    ])
+    let queryTable = ref([])
     let bodyTable = ref([])
-    /*
-    @table is json
-    @return a json object 
-    */
+
+    let headerNameSuggestion = ref([])
+
+    /**
+     * @param {json} table [{name:"abc ",value "123"}]
+     * @return {json} transformed Json [{"abc ":"123"}]
+     */
     function TableToJson(table) {
       let res = {}
       table.forEach((record) => {
-        let recordName = record.name
-        let recordValue = record.value
-        res[recordName] = recordValue
-        console.log(res)
+        if (record.name !== '') {
+          let recordName = record.name
+          let recordValue = record.value
+          res[recordName] = recordValue
+          console.log(res)
+        }
       })
       return res
     }
 
+    /**
+     * Send the api request to own backend and get the result in Json
+     */
     async function AccessAPI() {
       let header = TableToJson(headerTable.value)
       let body = TableToJson(bodyTable.value)
       // add queryparams to url todo later
-      let ParamsJson = TableToJson(queryTable.value)
-      const urlParams = new URLSearchParams(ParamsJson).toString()
-      console.log(targetURL.value+"?"+urlParams)
+      let paramsJson = TableToJson(queryTable.value)
+      let urlParams = ''
+      if (Object.keys(paramsJson).length !== 0) {
+        urlParams = '?' + new URLSearchParams(paramsJson).toString()
+      }
+
       //
 
       try {
@@ -127,8 +150,8 @@ export default {
           url: API_SERVER_URL,
           data: {
             header: header,
-            url: targetURL.value+"?"+urlParams,
-            method: selected_API_Method.value['value'],
+            url: targetURL.value + urlParams,
+            method: selected_API_Method.value,
             restBody: body
           }
         })
@@ -141,14 +164,20 @@ export default {
       }
     }
 
-    //@format: string
+    /**
+     * @param {string} format
+     */
     function ParseData(format) {
       //todo
       format = format.match('\/{1}([a-zA-Z]*)')
       //html
       //js
     }
-    //@dataSource:Array
+
+    /**
+     * add empty name value pair json to the array
+     * @param {arr} dataSource
+     */
     function AddData(dataSource) {
       //todo
       console.log(dataSource)
@@ -156,6 +185,69 @@ export default {
         name: '',
         value: ''
       })
+    }
+
+    /**
+     * add empty tab
+     * @param {arr} tabsArray
+     */
+    function SpawnEmptyTab(tabsArray) {
+      let length = tabsArray.length
+      tabsArray.push({
+        index: length,
+        url: '',
+        api_method: API_METHOD[0],
+        headers: [],
+        query: [],
+        body: []
+      })
+    }
+
+    /**
+     * add empty tab
+     * @param {json} tabsInfo
+     */
+    function SetupTab(tabInfo) {
+      
+      currentTab = tabInfo
+      // apply the setting
+      targetURL.value = currentTab.url
+      selected_API_Method.value = currentTab.api_method
+      headerTable.value = currentTab.headers
+      queryTable.value = currentTab.query
+      bodyTable.value = currentTab.body
+
+      // connection
+      currentTab.url = targetURL
+      currentTab.api_method = selected_API_Method
+      currentTab.headers = headerTable
+      currentTab.query = queryTable
+      currentTab.body = bodyTable
+    }
+    /**
+     * handle add and remove
+     * @param {'TabPaneName | undefined'} targetname
+     * @param {'add'|'remove'} action
+     */
+    function HandleTabsEdit(targetName, action) {
+      console.log(action)
+      console.log(targetName)
+      if (action === 'add') {
+        SpawnEmptyTab(tabs.value)
+      } else if (action === 'remove') {
+      }
+    }
+
+    /**
+     *
+     * @param {TabsPaneContext} pane
+     * @param {Event} ev
+     */
+    function SwtichTab(pane, ev) {
+      console.log('Swtich Tab')
+      console.log(currentTabValue.value)
+      //apply tab
+      SetupTab(tabs.value[currentTabValue.value])
     }
 
     return {
@@ -170,13 +262,26 @@ export default {
       headerNameSuggestion,
       headerTable,
       bodyTable,
-      TableToJson
+      TableToJson,
+      currentTabValue,
+      tabs,
+      SpawnEmptyTab,
+      SetupTab,
+      HandleTabsEdit,
+      SwtichTab,
+      currentTab
     }
   },
   mounted() {
     console.log('Mounted')
     this.selected_API_Method = API_METHOD[0]
     this.headerNameSuggestion = HEADER_NAMES
+
+    // init
+    // spawn empty tab
+    this.SpawnEmptyTab(this.tabs)
+    this.currentTabValue = this.tabs[0].index
+    this.SetupTab(this.tabs[0])
   }
 }
 </script>
