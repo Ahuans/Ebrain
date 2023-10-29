@@ -34,7 +34,7 @@ app.post('/api', async (req, res) => {
     let axiosConfig = {
       headers: req.body.header,
       url: req.body.url,
-      method: req.body.method
+      method: req.body.method.value
     }
     if (axiosConfig.method != 'get') {
       axiosConfig['data'] = req.body.restBody

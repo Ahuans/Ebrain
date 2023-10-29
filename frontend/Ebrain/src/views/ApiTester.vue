@@ -192,9 +192,13 @@ export default {
      * @param {arr} tabsArray
      */
     function SpawnEmptyTab(tabsArray) {
-      let length = tabsArray.length
+      let val = tabsArray.length
+      if (tabsArray.length !== 0) {
+        // index val based the index of last element in the array
+        val = tabsArray[val - 1].index + 1
+      }
       tabsArray.push({
-        index: length,
+        index: val,
         url: '',
         api_method: API_METHOD[0],
         headers: [],
@@ -208,21 +212,15 @@ export default {
      * @param {json} tabsInfo
      */
     function SetupTab(tabInfo) {
-      
-      currentTab = tabInfo
+      console.log('currenttab', tabInfo)
+      currentTab.value = tabInfo
       // apply the setting
-      targetURL.value = currentTab.url
-      selected_API_Method.value = currentTab.api_method
-      headerTable.value = currentTab.headers
-      queryTable.value = currentTab.query
-      bodyTable.value = currentTab.body
+      targetURL.value = currentTab.value.url
+      selected_API_Method.value = currentTab.value.api_method
 
-      // connection
-      currentTab.url = targetURL
-      currentTab.api_method = selected_API_Method
-      currentTab.headers = headerTable
-      currentTab.query = queryTable
-      currentTab.body = bodyTable
+      headerTable.value = currentTab.value.headers
+      queryTable.value = currentTab.value.query
+      bodyTable.value = currentTab.value.body
     }
     /**
      * handle add and remove
@@ -230,11 +228,27 @@ export default {
      * @param {'add'|'remove'} action
      */
     function HandleTabsEdit(targetName, action) {
-      console.log(action)
-      console.log(targetName)
+      console.log("action:" ,action," targetname : ",targetName)
       if (action === 'add') {
         SpawnEmptyTab(tabs.value)
+        console.log(tabs.value)
       } else if (action === 'remove') {
+        console.log(tabs.value)
+        // case : target = current
+        let nextTabValue = 0
+        if (targetName === currentTabValue.value) {
+          tabs.value.forEach((tab, index) => {
+            if (tab.index === targetName) {
+              const nextTab = tabs.value[index + 1] || tabs.value[index - 1]
+              if (nextTab) {
+                nextTabValue = nextTab.index
+                SetupTab(nextTab)
+              }
+            }
+          })
+          currentTabValue.value = nextTabValue
+          tabs.value = tabs.value.filter((tab) => tab.index !== targetName)
+        }
       }
     }
 
@@ -247,7 +261,8 @@ export default {
       console.log('Swtich Tab')
       console.log(currentTabValue.value)
       //apply tab
-      SetupTab(tabs.value[currentTabValue.value])
+      let targetTab = tabs.value.find((tab)=>tab.index===currentTabValue.value)
+      SetupTab(targetTab)
     }
 
     return {
@@ -282,6 +297,15 @@ export default {
     this.SpawnEmptyTab(this.tabs)
     this.currentTabValue = this.tabs[0].index
     this.SetupTab(this.tabs[0])
+  },
+  watch: {
+    //keep track
+    targetURL(newVal, oldVal) {
+      this.currentTab.url = newVal
+    },
+    selected_API_Method(newVal, oldVal) {
+      this.currentTab.api_method = newVal
+    }
   }
 }
 </script>
