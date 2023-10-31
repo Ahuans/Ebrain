@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 /*
 if you want to input any whole format like ip:port, please replace input with string: ip+#+port+#
+the parameter named address mostly means the whole format of string:ip+#+port+#
 and all parameter 'parent' is the name of parent node
  */
 public class ZooOp {

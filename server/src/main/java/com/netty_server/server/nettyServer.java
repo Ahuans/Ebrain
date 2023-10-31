@@ -3,7 +3,10 @@ package com.netty_server.server;
 import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 
 import com.netty_server.constants.Constants;
@@ -57,11 +60,12 @@ public class nettyServer
 			
 			});
 			ChannelFuture f=bootstrap.bind(8082).sync();
-			
-			CuratorFramework curatorFramework=ZookeeperFactory.create();
+			RetryPolicy retryPolicy=new ExponentialBackoffRetry(1000, 3);
+			CuratorFramework curatorFramework= CuratorFrameworkFactory.newClient("localhost:2181", retryPolicy);
+			curatorFramework.start();
 			InetAddress inetAddress=InetAddress.getLocalHost();
 			int port=8082;
-			curatorFramework.create().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(Constants.Server_PATH+"/"+inetAddress.getHostAddress()+"#"+port+"#");
+			curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath(Constants.Server_PATH+"/"+inetAddress.getHostAddress()+"#"+port+"#");
 			f.channel().closeFuture().sync();
 			} catch (Exception e) {
 			// TODO Auto-generated catch block
