@@ -40,24 +40,24 @@ public class ZooOp {
         InetAddress inetAddress = InetAddress.getByName(ip);
         try
         {
-            curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath(parent+"/"+inetAddress.getHostAddress()+"#"+port+"#");
+            curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath("/"+parent+"/"+inetAddress.getHostAddress()+"#"+port+"#");
         }
         catch (Exception e)
         {
             logger.info("ERROR:"+e.getMessage());
             throw e;
         }
-        logger.info("create node:"+parent+"/"+inetAddress.getHostAddress()+"#"+port+"#");
+        logger.info("create node:"+"/"+parent+"/"+inetAddress.getHostAddress()+"#"+port+"#");
     }
     public static void zooAddParent(String parent) throws Exception {
         try {
-            curatorFramework.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(parent);
+            curatorFramework.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath("/"+parent);
         }catch (Exception e)
         {
             logger.info("ERROR:"+e.getMessage());
             throw e;
         }
-        logger.info("create parent node:"+parent+"/");
+        logger.info("create parent node:"+"/"+parent+"/");
     }
 
 
@@ -68,7 +68,7 @@ public class ZooOp {
         List<String> res=new ArrayList();
         List<String> serverPaths= null;
         try {
-            serverPaths = curatorFramework.getChildren().forPath(parent);
+            serverPaths = curatorFramework.getChildren().forPath("/"+parent);
         } catch (Exception e) {
             logger.info("ERROR:"+e.getMessage());
             throw new RuntimeException(e);
@@ -92,52 +92,52 @@ public class ZooOp {
     //ip address may throw the NoSuchAddress exception
     public static void zooRemove(String parent,String address) throws Exception {
         try{
-            curatorFramework.delete().forPath(parent+"/"+address);
+            curatorFramework.delete().forPath("/"+parent+"/"+address);
         }
         catch (Exception e)
         {
             logger.info("ERROR:"+e.getMessage());
             throw  e;
         }
-        logger.info("delete node:"+parent+"/"+address);
+        logger.info("delete node:"+"/"+parent+"/"+address);
     }
     public static void zooRemoveParent(String parent) throws Exception {
         try {
-            curatorFramework.delete().deletingChildrenIfNeeded().forPath(parent);
+            curatorFramework.delete().deletingChildrenIfNeeded().forPath("/"+parent);
         }catch (Exception e)
         {
             logger.info("ERROR:"+e.getMessage());
             throw e;
         }
-        logger.info("delete parent node:"+parent+"/");
+        logger.info("delete parent node:"+"/"+parent+"/");
     }
     public static void zooRemoveChildren(String parent) throws Exception {
         List<String> serverPaths= null;
         try {
-            serverPaths = curatorFramework.getChildren().forPath(parent);
+            serverPaths = curatorFramework.getChildren().forPath("/"+parent);
         } catch (Exception e) {
             logger.info("ERROR:"+e.getMessage());
             throw new RuntimeException(e);
         }
         for(String s:serverPaths)
         {
-            curatorFramework.delete().forPath(parent+"/"+s);
-            logger.info("delete node:"+parent+"/"+s);
+            curatorFramework.delete().forPath("/"+parent+"/"+s);
+            logger.info("delete node:"+"/"+parent+"/"+s);
         }
     }
     //ip address may throw the NoSuchAddress exception
     public static void zooChange(String parent,String addressBefore,String addressAfter) throws Exception {
 
         try {
-            curatorFramework.delete().forPath(parent + "/" + addressBefore);
+            curatorFramework.delete().forPath("/"+parent + "/" + addressBefore);
             String[] address = addressAfter.split("#");
             InetAddress inetAddress = InetAddress.getByName(address[0]);
-            curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath(parent + "/" +  addressAfter);
+            curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath("/"+parent + "/" +  addressAfter);
         }catch (Exception e)
         {
             logger.info("ERROR:"+e.getMessage());
             throw  e;
         }
-        logger.info("change node "+parent + "/" + addressBefore+"to "+parent + "/" +  addressAfter);
+        logger.info("change node "+"/"+parent + "/" + addressBefore+"to "+"/"+parent + "/" +  addressAfter);
     }
 }

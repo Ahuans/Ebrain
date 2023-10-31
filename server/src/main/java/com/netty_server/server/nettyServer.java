@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 
@@ -34,48 +35,81 @@ import io.netty.handler.timeout.IdleStateHandler;
  */
 public class nettyServer 
 {
+	private final ServerBootstrap bootstrap;
+	private EventLoopGroup parentGroup;
+	private EventLoopGroup childGroup;
+	nettyServer(String parent,String ip,int port){
+		parentGroup=new NioEventLoopGroup();
+		childGroup=new NioEventLoopGroup();
+		bootstrap=new ServerBootstrap();
+		bootstrap.group(parentGroup,childGroup);
+		bootstrap.option(ChannelOption.SO_BACKLOG,128)
+				.childOption(ChannelOption.SO_KEEPALIVE, false)
+				.channel(NioServerSocketChannel.class)
+				.childHandler(new ChannelInitializer<SocketChannel>() {
+					@Override
+					protected void initChannel(SocketChannel ch) throws Exception {
+						// TODO Auto-generated method stub
+						ch.pipeline().addLast(new DelimiterBasedFrameDecoder(65535,Delimiters.lineDelimiter()[0]));
+						ch.pipeline().addLast(new StringDecoder());
+						ch.pipeline().addLast(new IdleStateHandler(60, 45,20 ,TimeUnit.SECONDS));
+						ch.pipeline().addLast(new SimpleServerHandler());
+						ch.pipeline().addLast(new StringEncoder());
 
 
-	public static void main(String[] args) {	
-		EventLoopGroup parentGroup=new NioEventLoopGroup();
-		EventLoopGroup childGroup=new NioEventLoopGroup();
-			try {	
-			ServerBootstrap bootstrap=new ServerBootstrap();
-			bootstrap.group(parentGroup,childGroup);
-			bootstrap.option(ChannelOption.SO_BACKLOG,128)
-			.childOption(ChannelOption.SO_KEEPALIVE, false)
-			.channel(NioServerSocketChannel.class)
-			.childHandler(new ChannelInitializer<SocketChannel>() {
-				@Override
-				protected void initChannel(SocketChannel ch) throws Exception {
-					// TODO Auto-generated method stub
-					ch.pipeline().addLast(new DelimiterBasedFrameDecoder(65535,Delimiters.lineDelimiter()[0]));
-					ch.pipeline().addLast(new StringDecoder());
-					ch.pipeline().addLast(new IdleStateHandler(60, 45,20 ,TimeUnit.SECONDS));
-					ch.pipeline().addLast(new SimpleServerHandler());
-					ch.pipeline().addLast(new StringEncoder());
-					
-					
-				}
-			
-			});
-			ChannelFuture f=bootstrap.bind(8082).sync();
-			RetryPolicy retryPolicy=new ExponentialBackoffRetry(1000, 3);
-			CuratorFramework curatorFramework= CuratorFrameworkFactory.newClient("localhost:2181", retryPolicy);
-			curatorFramework.start();
-			InetAddress inetAddress=InetAddress.getLocalHost();
-			int port=8082;
-			curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath(Constants.Server_PATH+"/"+inetAddress.getHostAddress()+"#"+port+"#");
+					}
+
+				});
+		try {
+			ChannelFuture f=bootstrap.bind(port).sync();
+			CuratorFramework curatorFramework=ZookeeperFactory.create();
+			curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath("/"+parent+"/"+ip+"#"+port+"#");
 			f.channel().closeFuture().sync();
-			} catch (Exception e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			parentGroup.shutdownGracefully();
 			childGroup.shutdownGracefully();
 		}
-	    
-	    
 	}
+//	public static void main(String[] args) {
+//		EventLoopGroup parentGroup=new NioEventLoopGroup();
+//		EventLoopGroup childGroup=new NioEventLoopGroup();
+//			try {
+//			ServerBootstrap bootstrap=new ServerBootstrap();
+//			bootstrap.group(parentGroup,childGroup);
+//			bootstrap.option(ChannelOption.SO_BACKLOG,128)
+//			.childOption(ChannelOption.SO_KEEPALIVE, false)
+//			.channel(NioServerSocketChannel.class)
+//			.childHandler(new ChannelInitializer<SocketChannel>() {
+//				@Override
+//				protected void initChannel(SocketChannel ch) throws Exception {
+//					// TODO Auto-generated method stub
+//					ch.pipeline().addLast(new DelimiterBasedFrameDecoder(65535,Delimiters.lineDelimiter()[0]));
+//					ch.pipeline().addLast(new StringDecoder());
+//					ch.pipeline().addLast(new IdleStateHandler(60, 45,20 ,TimeUnit.SECONDS));
+//					ch.pipeline().addLast(new SimpleServerHandler());
+//					ch.pipeline().addLast(new StringEncoder());
+//
+//
+//				}
+//
+//			});
+//			ChannelFuture f=bootstrap.bind(8082).sync();
+//			CuratorFramework curatorFramework=ZookeeperFactory.create();
+//			InetAddress inetAddress=InetAddress.getLocalHost();
+//			int port=8082;
+//			curatorFramework.create().withMode(CreateMode.PERSISTENT).forPath(Constants.Server_PATH+"/"+inetAddress.getHostAddress()+"#"+port+"#");
+//			f.channel().closeFuture().sync();
+//			} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			parentGroup.shutdownGracefully();
+//			childGroup.shutdownGracefully();
+//		}
+//
+//
+//	}
     
     
 }

@@ -46,12 +46,12 @@ public class Node {
 
     public  String getNodeData() throws Exception
     {
-        byte[] data = curatorFramework.getData().forPath(parent+"/"+ip+"#"+port+"#");
+        byte[] data = curatorFramework.getData().forPath("/"+parent+"/"+ip+"#"+port+"#");
         String nodeData = new String(data, StandardCharsets.UTF_8);
         return nodeData;
     }
-    public String[] getNodeStat() throws Exception {
-        Stat nodeStat = curatorFramework.checkExists().forPath(parent+"/"+ip+"#"+port+"#");
+    public String[] getNodeStatString() throws Exception {
+        Stat nodeStat = curatorFramework.checkExists().forPath("/"+parent+"/"+ip+"#"+port+"#");
         String[] statusArray=new String[11];
         if (nodeStat != null) {
             statusArray[0] = "Version: " + nodeStat.getVersion();
@@ -68,6 +68,10 @@ public class Node {
 
         }
         return statusArray;
+    }
+    public Stat getNodeStat() throws Exception {
+        Stat nodeStat = curatorFramework.checkExists().forPath("/"+parent+"/"+ip+"#"+port+"#");
+        return nodeStat;
     }
 
 }

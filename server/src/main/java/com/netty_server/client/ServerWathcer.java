@@ -34,7 +34,6 @@ public class ServerWathcer implements CuratorWatcher {
 		{
 			String[] str=realServer.split("#");
 			ChannelFuture channelFuture=NettyClient.b.connect(str[0],Integer.valueOf(str[1]));
-			
 			ChannelManager.add(channelFuture);
 			
 		}
