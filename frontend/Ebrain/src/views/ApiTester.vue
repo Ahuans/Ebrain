@@ -28,7 +28,7 @@
       <el-input v-model="targetURL" placeholder="please enter url"></el-input>
     </el-col>
     <el-col :span="2">
-      <el-button type="primary" @Click="AccessAPI">Go</el-button>
+      <el-button type="primary" @Click="AccessAPI(currentTab)">Go</el-button>
     </el-col>
   </el-row>
   <el-row>
@@ -55,8 +55,11 @@
   </el-row>
   <!--Result preview area -->
   <el-row>
-    <el-col>
+    <el-col :span="2">
       <p>Result</p>
+    </el-col>
+    <el-col :span="2" :offset="18">
+      <p>Time : {{ requestTime }} ms</p>
     </el-col>
   </el-row>
   <el-row>
@@ -89,26 +92,25 @@ export default {
   },
 
   setup(props, ctx) {
+    // variable related to api tabs
     let tabs = ref([])
     let currentTabValue = ref()
-
     let currentTab = ref()
 
+    //varibles related to api
     let targetURL = ref('')
     let selected_API_Method = ref('')
-    let result = ref('')
-    let tabActiveName = ref('Header')
-    let headerTable = ref([
-      {
-        name: 'content-type',
-        value: 'application/json'
-      }
-    ])
+    let headerTable = ref([])
     let queryTable = ref([])
     let bodyTable = ref([])
+    let result = ref('')
+    let requestTime = ref(0)
 
+    // varibles related to the page components
+    let tabActiveName = ref('Header')
     let headerNameSuggestion = ref([])
 
+    //functions
     /**
      * @param {json} table [{name:"abc ",value "123"}]
      * @return {json} transformed Json [{"abc ":"123"}]
@@ -129,18 +131,17 @@ export default {
     /**
      * Send the api request to own backend and get the result in Json
      */
-    async function AccessAPI() {
-      let header = TableToJson(headerTable.value)
-      let body = TableToJson(bodyTable.value)
+    async function AccessAPI(tabInfo) {
+      let header = TableToJson(tabInfo.headers)
+      let body = TableToJson(tabInfo.body)
       // add queryparams to url todo later
-      let paramsJson = TableToJson(queryTable.value)
+      let paramsJson = TableToJson(tabInfo.query)
       let urlParams = ''
       if (Object.keys(paramsJson).length !== 0) {
         urlParams = '?' + new URLSearchParams(paramsJson).toString()
       }
-
-      //
-
+      // send request to backend
+      let startTime = performance.now()
       try {
         let response = await axios({
           headers: {
@@ -150,18 +151,21 @@ export default {
           url: API_SERVER_URL,
           data: {
             header: header,
-            url: targetURL.value + urlParams,
-            method: selected_API_Method.value,
+            url: tabInfo.url + urlParams,
+            method: tabInfo.api_method,
             restBody: body
           }
         })
-
-        result.value = response.data.data
+        tabInfo.result = response.data.data
+        //result.value = response.data.data
         console.log(response.data.header['content-type'])
-        console.log(result.value)
+        console.log(tabInfo.result)
       } catch (error) {
         console.log(error)
       }
+      let endTime = performance.now()
+      //requestTime.value =Math.round(endTime - startTime);
+      tabInfo.requestTime = Math.round(endTime - startTime)
     }
 
     /**
@@ -179,7 +183,6 @@ export default {
      * @param {arr} dataSource
      */
     function AddData(dataSource) {
-      //todo
       console.log(dataSource)
       dataSource.push({
         name: '',
@@ -203,7 +206,9 @@ export default {
         api_method: API_METHOD[0],
         headers: [],
         query: [],
-        body: []
+        body: [],
+        requestTime: 0,
+        result: ''
       })
     }
 
@@ -214,26 +219,35 @@ export default {
     function SetupTab(tabInfo) {
       console.log('currenttab', tabInfo)
       currentTab.value = tabInfo
+
       // apply the setting
       targetURL.value = currentTab.value.url
       selected_API_Method.value = currentTab.value.api_method
-
       headerTable.value = currentTab.value.headers
       queryTable.value = currentTab.value.query
       bodyTable.value = currentTab.value.body
+      result.value = currentTab.value.result
+      requestTime.value = currentTab.value.requestTime
     }
+
     /**
      * handle add and remove
      * @param {'TabPaneName | undefined'} targetname
      * @param {'add'|'remove'} action
      */
     function HandleTabsEdit(targetName, action) {
-      console.log("action:" ,action," targetname : ",targetName)
+      console.log('action:', action, ' targetname : ', targetName)
       if (action === 'add') {
+        //add tab
         SpawnEmptyTab(tabs.value)
         console.log(tabs.value)
       } else if (action === 'remove') {
+        //remove tab
         console.log(tabs.value)
+        if (tabs.value.length <= 1) {
+          console.log('Cant remove tab as there is only one')
+          return
+        }
         // case : target = current
         let nextTabValue = 0
         if (targetName === currentTabValue.value) {
@@ -261,7 +275,7 @@ export default {
       console.log('Swtich Tab')
       console.log(currentTabValue.value)
       //apply tab
-      let targetTab = tabs.value.find((tab)=>tab.index===currentTabValue.value)
+      let targetTab = tabs.value.find((tab) => tab.index === currentTabValue.value)
       SetupTab(targetTab)
     }
 
@@ -284,7 +298,8 @@ export default {
       SetupTab,
       HandleTabsEdit,
       SwtichTab,
-      currentTab
+      currentTab,
+      requestTime
     }
   },
   mounted() {
@@ -305,6 +320,14 @@ export default {
     },
     selected_API_Method(newVal, oldVal) {
       this.currentTab.api_method = newVal
+    },
+
+    currentTab: {
+      handler(newVal, oldVal) {
+        this.result = this.currentTab.result
+        this.requestTime = this.currentTab.requestTime
+      },
+      deep:true
     }
   }
 }
