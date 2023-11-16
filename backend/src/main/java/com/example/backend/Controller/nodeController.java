@@ -1,5 +1,6 @@
 package com.example.backend.Controller;
 
+import com.netty_server.tool.Node;
 import com.netty_server.tool.ZooOp;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -93,4 +94,20 @@ public class nodeController {
         List<String> list = ZooOp.zooSearch(parent, address);
         return list;
     }
+
+    @ResponseBody
+    @PostMapping("/getDetailNodeInformation")
+    public String[] getDetailInformation(@RequestParam String parent,@RequestParam String ip,@RequestParam int port){
+        try {
+            Node temp=new Node(parent,ip,port);
+            String[] nodeStatString = temp.getNodeStatString();
+            return nodeStatString;
+        } catch (Exception e) {
+            e.printStackTrace();
+            String[] fail = new String[1];
+            fail[0]=e.getMessage();
+            return fail;
+        }
+    }
+
 }
