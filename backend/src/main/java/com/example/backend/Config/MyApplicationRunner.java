@@ -14,6 +14,6 @@ public class MyApplicationRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        ZookeeperFactory.initialCreate("localhost:2181");
+        //ZookeeperFactory.initialCreate("localhost:2181");
     }
 }

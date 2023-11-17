@@ -1,5 +1,6 @@
 package com.example.backend.Controller;
 
+import com.netty_server.factory.ZookeeperFactory;
 import com.netty_server.tool.Node;
 import com.netty_server.tool.ZooOp;
 import org.springframework.http.ResponseEntity;
@@ -108,6 +109,13 @@ public class nodeController {
             fail[0]=e.getMessage();
             return fail;
         }
+    }
+
+    @ResponseBody
+    @PostMapping("/connectServer")
+    public String getDetailInformation(@RequestParam String port ){
+        ZookeeperFactory.initialCreate("localhost:"+port);
+        return "success";
     }
 
 }
