@@ -1,4 +1,4 @@
-package com.whx.netty_server.server;//package com.whx.netty_server.server;
+package com.netty_server.server;//package com.whx.netty_server.server;
 //
 //import org.springframework.context.ApplicationContext;
 //import org.springframework.context.annotation.AnnotationConfigApplicationContext;
