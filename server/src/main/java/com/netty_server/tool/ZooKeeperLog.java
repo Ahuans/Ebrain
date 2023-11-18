@@ -3,22 +3,24 @@ package com.netty_server.tool;
 import java.io.*;
 
 public class ZooKeeperLog{
-    public static void read(String logFilePath){
-         try (BufferedReader reader = new BufferedReader(new FileReader(logFilePath))) {
-            String line;
+    public static String read(){
+        StringBuilder ans= new StringBuilder();
+         try (BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/zookeeper.log"))) {
+             String line;
             while ((line = reader.readLine()) != null) {
-                // 在这里可以对每一行日志进行处理，例如输出到控制台或者写入文件
-                System.out.println(line);
+                ans.append(line).append("\n");
+
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+             System.out.println(e.getMessage());
         }
+         return ans.toString();
     }
-    public static void removeAll(String logFilePath)
+    public static void removeAll()
     {
         try {
             // 使用 PrintWriter 打开日志文件
-            PrintWriter writer = new PrintWriter(new FileWriter(logFilePath));
+            PrintWriter writer = new PrintWriter(new FileWriter("src/main/resources/zookeeper.log"));
 
             // 清空日志文件内容
             writer.print("");

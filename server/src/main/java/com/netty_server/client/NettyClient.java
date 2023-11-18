@@ -76,6 +76,7 @@ public class NettyClient {
     public void connectDirectly(String parent,String ip,int port)
     {
         try {
+            ZookeeperFactory.initialCreate("localhost:2181");
             CuratorFramework curatorFramework = ZookeeperFactory.create();
 
         }catch (Exception e)

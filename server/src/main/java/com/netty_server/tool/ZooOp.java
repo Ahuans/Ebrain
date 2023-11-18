@@ -1,12 +1,12 @@
 package com.netty_server.tool;
 
-import com.netty_server.constants.Constants;
+
 import com.netty_server.factory.ZookeeperFactory;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.CreateMode;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+
 import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,13 +59,15 @@ public class ZooOp {
         }
         logger.info("create parent node:"+"/"+parent+"/");
     }
+    public static List<String> zooSearchAllParents() throws Exception {
+        return curatorFramework.getChildren().forPath("/");
+    }
 
-
-    //search address which is enrolled in the zookeeper,notice: when input String "all", can output all address in zookeeper
+    //search address which is enrolled in the zookeeper,notice: when input String "all", can output all address in specific parent
     //if there is no address that you want ,will output empty list
     //remember: the address in list output format is like :ip+#+port+#
     public static List<String> zooSearch(String parent,String address)  {
-        List<String> res=new ArrayList();
+        List<String> res=new ArrayList<>();
         List<String> serverPaths= null;
         try {
             serverPaths = curatorFramework.getChildren().forPath("/"+parent);
