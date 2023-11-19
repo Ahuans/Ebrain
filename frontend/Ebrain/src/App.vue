@@ -1,8 +1,9 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import {ref} from "vue";
 const isLoggedIn = ref(false)
 // for test
-// const isLoggedIn = ref(true)
+// const isLoggedIn = true
 // let username = ''
 // let password = ''
 
@@ -29,19 +30,21 @@ const submitForm = async () => {
 </script>
 
 <template>
-  <div>
+  <div class="login-container">
     <template v-if="!isLoggedIn">
       <header>
-        <div class="common-layout">
+        <div class="login-box">
           <h1>Login Page</h1>
           <form @submit.prevent="submitForm">
-            <label for="username">Username:</label>
-            <input type="text" id="username" v-model="username" required>
-            <br>
-            <label for="password">Password:</label>
-            <input type="password" id="password" v-model="password" required>
-            <br>
-            <button type="submit">Login</button>
+            <div class="form-group">
+              <label for="username" class="input-label">Username:</label>
+              <input type="text" id="username" v-model="username" class="input-field" required>
+            </div>
+            <div class="form-group">
+              <label for="password" class="input-label">Password:</label>
+              <input type="password" id="password" v-model="password" class="input-field" required>
+            </div>
+            <button type="submit" class="login-button">Login</button>
           </form>
         </div>
       </header>
@@ -67,4 +70,54 @@ const submitForm = async () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-image: linear-gradient(to bottom, white, lightblue, blue);
+}
+
+.login-box {
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  background-color: white;
+  color: black;
+  width: 400px;
+  border: 4px solid #4e4ea5;
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.input-label {
+  color: black;
+  flex: 0.8;
+  display: block;
+  text-align: left;
+  margin-right: 10px;
+}
+
+.input-field {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid black;
+  width: 50%;
+  color: black;
+}
+
+.login-button {
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: none;
+  background-color: lightblue;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+}
+</style>
