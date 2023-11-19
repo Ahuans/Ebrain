@@ -29,9 +29,10 @@ import { RouterLink, RouterView } from 'vue-router'
           <el-container>
             <el-aside width="200px">
               <h1>Ebrain</h1>
-              <el-menu default-active="2" class="el-menu-vertical-demo">
+              <el-menu default-active="3" class="el-menu-vertical-demo">
                 <el-menu-item index="1" @click="$router.push('/admin')">ZooKeeper</el-menu-item>
                 <el-menu-item index="2" @click="$router.push('/ApiTester')">API</el-menu-item>
+                <el-menu-item index="3" @click="$router.push('/log')">Log</el-menu-item>
               </el-menu>
             </el-aside>
             <el-main>
