@@ -1,50 +1,24 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import {ref} from "vue";
-const isLoggedIn = ref(false)
-// for test
-// const isLoggedIn = true
-// let username = ''
-// let password = ''
 
-const submitForm = async () => {
-  const formData = new FormData()
-  formData.append('username', username)
-  formData.append('password', password)
-
-  try {
-    const response = await fetch('http://localhost:8081/login', {
-      method: 'POST',
-      body: formData
-    })
-
-    if (response.ok) {
-      isLoggedIn.value = true
-    } else {
-      console.error('Fail. Please check your entries')
-    }
-  } catch (error) {
-    console.error('Error:', error)
-  }
-}
 </script>
 
 <template>
-  <div class="login-container">
-    <template v-if="!isLoggedIn">
+  <div>
+    <template v-if="!isLoggedIn" class="login-container">
       <header>
         <div class="login-box">
           <h1>Login Page</h1>
-          <form @submit.prevent="submitForm">
+          <form>
             <div class="form-group">
               <label for="username" class="input-label">Username:</label>
-              <input type="text" id="username" v-model="username" class="input-field" required>
+              <input type="text" id="username" class="input-field" required>
             </div>
             <div class="form-group">
               <label for="password" class="input-label">Password:</label>
-              <input type="password" id="password" v-model="password" class="input-field" required>
+              <input type="password" id="password" class="input-field" required>
             </div>
-            <button type="submit" class="login-button">Login</button>
+            <button type="submit" class="login-button" @click="login">Login</button>
           </form>
         </div>
       </header>
@@ -70,6 +44,41 @@ const submitForm = async () => {
   </div>
 </template>
 
+<script>
+export default {
+  data() {
+    return {
+      isLoggedIn: true,
+      username: '',
+      password: ''
+    };
+  },
+  methods: {
+    async login() {
+      const formData = new FormData();
+      formData.append('username', this.username);
+      formData.append('password', this.password);
+
+      try {
+        const response = await fetch('http://localhost:8081/login', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          this.isLoggedIn = true;
+          console.log('Login successful');
+        } else {
+          console.error('Login failed. Please check your credentials');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+  }
+};
+</script>
+
 <style scoped>
 .login-container {
   display: flex;
@@ -86,7 +95,7 @@ const submitForm = async () => {
   background-color: white;
   color: black;
   width: 400px;
-  border: 4px solid #4e4ea5;
+  border: 4px solid rgba(78, 78, 165, 0.82);
 }
 
 .form-group {
@@ -115,7 +124,7 @@ const submitForm = async () => {
   padding: 8px 16px;
   border-radius: 5px;
   border: none;
-  background-color: lightblue;
+  background-color: rgb(78, 78, 165);
   color: white;
   cursor: pointer;
   margin-top: 10px;
