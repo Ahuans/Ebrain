@@ -54,7 +54,6 @@ public class securityConfig {
         http.addFilterBefore(new CorsFilter(source),CorsFilter.class)
                 .csrf().disable()
                 .authorizeRequests()
-                .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .successHandler((req, resp, authentication) -> {
