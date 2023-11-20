@@ -132,9 +132,11 @@ public class nodeController {
     }
     @ResponseBody
     @PostMapping("/getLog")
-    public String getLog(){
+    public String[] getLog(){
+        String read = ZooKeeperLog.read();
+        String[] log = read.split("\\n");
 
-        return  ZooKeeperLog.read();
+        return  log;
     }
 
     @ResponseBody
