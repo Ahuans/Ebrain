@@ -1,63 +1,109 @@
 <template>
-  <div class="container">
+  <header :style="{background: '#fff', boxShadow: '0 2px 3px 2px rgba(0,0,0,.1)'}">
+    <div class="monitor-container">
+      <div class="monitor-item">
+        <i class="bi bi-hourglass-split" style="font-size: 70px;"></i>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 10px;">
+          <el-input v-model="connectPort" placeholder="Enter port No." style="width: 200px;" />
+          <br />
+          <el-button @click="connectNode" type="primary">Connect</el-button>
+        </div>
+      </div>
+      <div class="monitor-item">
+        <i class="bi bi-plus-circle" style="font-size: 70px;"></i>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 10px;">
+          <el-input v-model="newNodeRemark" ref="remarkInput" placeholder="Enter parent name" style="width: 200px;" />
+          <br />
+          <el-button @click="addNode" type="primary">Add</el-button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="container" :style="{background: '#fff', boxShadow: '0 2px 3px 2px rgba(0,0,0,.1)'}">
     <div class="sidebar">
       <h2>Menu</h2>
       <div class="search-bar">
-        <el-input v-model="searchText" placeholder="Type localhost / port..." />
+        <el-input v-model="searchText" placeholder="Type names..." />
       </div>
       <div class="node-list">
         <div class="node-item" v-for="node in filteredNodeList" :key="node.id">
-          <span @click="selectNode(node)">{{ node.remark }} {{ node.localhost }}</span>
-          <el-button type="primary" @click="deleteNode(node)">Delete</el-button>
+          <span @click="selectNode(node)">{{ node.remark }}</span>
+          <el-button type="primary" @click="deleteNode(node)" style="display: flex">Delete</el-button>
+          <el-button type="primary" @click="showDrawer=true">Edit</el-button>
+          <el-drawer title="Edit Node" v-model="showDrawer" @close="closeDrawer" direction="ttb">
+            <el-form ref="editForm" :model="editForm" label-width="120px">
+              <el-form-item label="Address Before">
+                <el-input v-model="editForm.addressBefore"></el-input>
+              </el-form-item>
+              <el-form-item label="Address After">
+                <el-input v-model="editForm.addressAfter"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-button @click="cancelEdit">Cancel</el-button>
+                <el-button type="primary" @click="editAddress(node)">Submit</el-button>
+              </el-form-item>
+            </el-form>
+          </el-drawer>
         </div>
-      </div>
-      <div class="add-node">
-        <el-input style="margin-bottom: 10px;" v-model="newNodeRemark" ref="remarkInput" placeholder="Remark" />
-        <el-input style="margin-bottom: 10px;" v-model="newNodeLocalhost" ref="localhostInput" placeholder="Localhost" />
-        <el-button type="primary" @click="addNode">Add Node</el-button>
       </div>
     </div>
+
     <div class="main">
-      <h2>Node Information</h2>
+
+<!--      <h2>Node Information</h2>-->
       <div v-if="selectedNode" class="node-info">
-        <p>
-          Remark:
-          <template v-if="isEditing">
-            <el-input v-model="editedRemark" />
-          </template>
-          <template v-else>
-            {{ selectedNode.remark }}
-          </template>
-        </p>
-        <p>Localhost: {{ selectedNode.localhost }}</p>
-        <p>Port: {{ selectedNode.port }}</p>
-        <el-button type="primary" style="margin-bottom: 10px;" v-if="!isEditing" @click="editNode">Edit</el-button>
-        <el-button type="primary" v-if="isEditing" @click="saveNode">Save</el-button>
-        <el-textarea v-model="selectedNode.text" rows="4" cols="50" placeholder="Add some details..."></el-textarea>
-        <br>
-        <el-button type="primary" @click="connectNode">Connect</el-button>
-        <el-button type="primary" @click="add_sub">Add</el-button>
-        <el-button type="primary" @click="delete_sub">Delete</el-button>
-
-        <div v-if="showAddSubForm" class="add-sub-form">
-          <el-input v-model="newSubNodeParent" placeholder="Parent" />
-          <el-input v-model="newSubNodeIp" placeholder="IP" />
-          <el-input v-model="newSubNodePort" placeholder="Port" />
-          <el-button type="primary" @click="confirmAddSub">Confirm</el-button>
-          <el-button type="text" @click="cancelAddSub">Cancel</el-button>
+        <h2>
+          {{ selectedNode.remark }}
+<!--          <template v-if="isEditing">-->
+<!--            <el-input v-model="editedRemark" />-->
+<!--          </template>-->
+<!--          <template v-else>-->
+<!--            {{ selectedNode.remark }}-->
+<!--          </template>-->
+        </h2>
+<!--        <p>Localhost: {{ selectedNode.localhost }}</p>-->
+<!--        <p>Port: {{ selectedNode.port }}</p>-->
+<!--        <el-button type="primary" style="margin-bottom: 10px;" v-if="!isEditing" @click="editNode">Edit</el-button>-->
+        <div class="sub-nodes">
+          <h3>Sub Nodes Information:</h3>
+          <el-collapse v-if="subNodes.length > 0">
+          <el-collapse-item v-for="subNode in subNodes" :key="subNode" :title="subNode">
+            {{ subNode }}
+          </el-collapse-item>
+          </el-collapse>
+<!--          <el-button type="primary" v-if="isEditing" @click="saveNode">Save</el-button>-->
+<!--          <el-textarea v-model="selectedNode.text" rows="4" cols="50" placeholder="Add some details..."></el-textarea>-->
+<!--          <br>-->
+  <!--        <el-button type="primary" @click="connectNode">Connect</el-button>-->
+          <el-button type="primary" @click="add_sub">Add Sub Node</el-button>
+          <el-button type="primary" @click="delete_sub">Delete Sub Node</el-button>
+          <el-button type="primary" @click="clear_sub">Delete All Sub Node</el-button>
+          <br><br>
+          <div v-if="showAddSubForm" class="add-sub-form">
+  <!--          <el-input v-model="newSubNodeParent" placeholder="Parent" :style="{ width: '50%' }"/><br>-->
+            <el-input v-model="newSubNodeIp" placeholder="IP" :style="{ width: '50%' }"/><br>
+            <el-input v-model="newSubNodePort" placeholder="Port" :style="{ width: '50%' }"/><br><br>
+            <el-button type="primary" @click="confirmAddSub">Confirm</el-button>
+            <el-button type="text" @click="cancelAddSub">Cancel</el-button>
+          </div>
+          <br>
+          <div v-if="showDeleteForm" class="delete-form">
+  <!--          <el-input v-model="deleteForm.parent" placeholder="Parent" :style="{ width: '50%' }"/><br>-->
+            <el-input v-model="deleteAddress" placeholder="Address" :style="{ width: '50%' }"/><br><br>
+            <el-button type="primary" @click="confirmDelete">Confirm</el-button>
+            <el-button type="text" @click="cancelDelete">Cancel</el-button>
+          </div>
         </div>
-
-        <div v-if="showDeleteForm" class="delete-form">
-          <el-input v-model="deleteForm.parent" placeholder="Parent" />
-          <el-input v-model="deleteForm.address" placeholder="Address" />
-          <el-button type="primary" @click="confirmDelete">Confirm</el-button>
-          <el-button type="text" @click="cancelDelete">Cancel</el-button>
-        </div>
-
         <div>
           <h3>Node Details</h3>
           <div>
-            <el-button type="primary" @click="selectNodeDetails(selectedNode.id)">Refresh Details</el-button>
+            <el-button type="primary" @click="refresh">Refresh Details</el-button>
+            <div v-if="showReForm" class="add-sub-form">
+              <el-input v-model="reIP" placeholder="IP" :style="{ width: '50%' }"/><br>
+              <el-input v-model="rePort" placeholder="Port" :style="{ width: '50%' }"/><br><br>
+              <el-button type="primary" @click="selectNodeDetails">Confirm</el-button>
+              <el-button type="text" @click="cancelRefresh">Cancel</el-button>
+            </div>
           </div>
           <div v-if="nodeDetailsLoading">Loading...</div>
           <div v-else>
@@ -79,32 +125,14 @@ export default {
       nodeList: [
         {
           id: 1,
-          remark: 'Parent Node 1',
-          localhost: 'localhost1',
-          port: '8080',
-          text: ''
-        },
-        {
-          id: 2,
-          remark: 'Parent Node 2',
-          localhost: 'localhost2',
-          port: '8081',
-          text: ''
-        },
-        {
-          id: 3,
-          remark: 'Parent Node 3',
-          localhost: 'localhost3',
-          port: '8082',
+          remark: 'Node 1',
           text: ''
         }
       ],
       newNodeRemark: '',
-      newNodeLocalhost: '',
       selectedNode: null,
       searchText: '',
       isEditing: false,
-      editedRemark: '',
       responseData: [],
       nodeDetails: '',
       nodeDetailsLoading: false,
@@ -113,61 +141,145 @@ export default {
       newSubNodeIp: '',
       newSubNodePort: '',
       showDeleteForm: false,
-      deleteForm: {
-        parent: '',
-        address: ''
-      }
+      deleteAddress: '',
+      connectionStatus: '',
+      connectPort:'',
+      loading: true,
+      success: false,
+      error: false,
+      subNodes: [],
+      showDrawer: false,
+      editForm: {
+        addressBefore: '',
+        addressAfter: ''
+      },
+      reIP:'',
+      rePort:'',
+      showReForm: false
     };
   },
-
+  // created() {
+  //   this.checkConnectionStatus();
+  //   setInterval(() => {
+  //     this.checkConnectionStatus();
+  //   }, 5000);
+  // },
   methods: {
     addNode() {
-      if (this.newNodeLocalhost) {
+      if (this.newNodeRemark) {
         const newNode = {
           id: this.nodeList.length + 1,
           remark: this.newNodeRemark,
-          localhost: this.newNodeLocalhost,
-          port: 'port', // 使用默认的端口
           text: ''
         };
-        this.nodeList.push(newNode);
-        this.newNodeRemark = '';
-        this.newNodeLocalhost = '';
-        this.$refs.localhostInput.focus();
 
         const formData = new FormData();
-        formData.append('localhost', newNode.localhost);
+        formData.append('parent', newNode.remark);
 
         fetch('http://localhost:8081/addParent', {
           method: 'POST',
           body: formData
         })
-            .then(response => response.json())
-            .then(data => {
-              console.log('添加节点成功:', data);
+            .then(response => {
+              if (response.ok) {
+                console.log('Success Add Node');
+                this.nodeList.push(newNode);
+                this.$refs.remarkInput.focus();
+                this.newNodeRemark = '';
+              } else {
+                console.error('Fail');
+              }
             })
             .catch(error => {
-              console.error('添加节点失败:', error);
+              console.error('Error:', error);
             });
       }
     },
+    closeDrawer() {
+      this.showDrawer = false;
+      this.clearForm();
+    },
+    clearForm() {
+      this.editForm.addressBefore = '';
+      this.editForm.addressAfter = '';
+    },
+    cancelEdit() {
+      this.closeDrawer();
+    },
+    editAddress(node){
+      const formData = new FormData();
+      formData.append('parent', node.remark);
+      formData.append('addressBefore', this.editForm.addressBefore);
+      formData.append('addressAfter', this.editForm.addressAfter);
 
+
+      fetch('http://localhost:8081/updateNode', {
+        method: 'POST',
+        body: formData
+      })
+          .then(response => {
+            if (response.ok) {
+              console.log('Update successful');
+            } else {
+              console.error('Update failed');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+
+      this.closeDrawer();
+    },
     selectNode(node) {
       this.selectedNode = node;
+      this.getSubNodes(node.remark);
       this.nodeDetails = '';
     },
-
-    selectNodeDetails(nodeId) {
-      this.nodeDetailsLoading = true;
+    refresh(){
+      this.showReForm=true;
+    },
+    cancelRefresh() {
+      this.reIP = '';
+      this.rePort = '';
+      this.showReForm = false;
+    },
+    getSubNodes(remark) {
       const formData = new FormData();
-      formData.append('nodeId', nodeId);
+      formData.append('parent', remark);
+      formData.append('address', 'all');
 
       fetch('http://localhost:8081/getNodeInformation', {
         method: 'POST',
         body: formData
       })
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error('Failed to retrieve sub nodes.');
+            }
+          })
+          .then(data => {
+            this.subNodes = data;
+          })
+          .catch(error => {
+            console.error(error);
+          });
+    },
+    selectNodeDetails() {
+      this.nodeDetailsLoading = true;
+      const formData = new FormData();
+      formData.append('parent', this.selectedNode.remark);
+      formData.append('ip', this.reIP);
+      formData.append('port', this.rePort);
+
+      fetch('http://localhost:8081/http://localhost:8081/getDetailNodeInformation', {
+        method: 'POST',
+        body: formData
+      })
           .then(response => response.text())
           .then(data => {
+            this.showReForm = false;
             this.nodeDetailsLoading = false;
             this.nodeDetails = data;
           })
@@ -181,18 +293,21 @@ export default {
       const index = this.nodeList.indexOf(node);
       if (index !== -1) {
         const formData = new FormData();
-        formData.append('localhost', node.localhost);
+        formData.append('parent', node.remark);
 
-        fetch('http://localhost:8081/deleteParent', {
+        fetch('http://localhost:8081/removeParent', {
           method: 'POST',
           body: formData
         })
-          .then(response => response.json())
-          .then(data => {
-            console.log('删除节点成功:', data);
+          .then(response => {
+            if (response.ok) {
+              console.log('Success');
+            } else {
+              console.error('Fail, try again');
+            }
           })
           .catch(error => {
-            console.error('删除节点失败:', error);
+            console.error('Error:', error);
           });
 
         this.nodeList.splice(index, 1);
@@ -202,25 +317,59 @@ export default {
       }
     },
 
-    editNode() {
-      this.isEditing = true;
-    },
+    // editNode() {
+    //   this.isEditing = true;
+    // },
+    //
+    // saveNode() {
+    //   this.selectedNode.remark = this.editedRemark;
+    //   this.isEditing = false;
+    // },
 
-    saveNode() {
-      this.selectedNode.remark = this.editedRemark;
-      this.isEditing = false;
-    },
-
+    // actively check connection,
     connectNode() {
-      // 没有相关接口
+      const formData = new FormData();
+      formData.append('connectPort', this.connectPort);
+      fetch('http://localhost:8081/connectServer', {
+        method: 'POST',
+        body: formData
+      })
+          .then(response => {
+            if (response.ok) {
+              this.success = true;
+              console.log('Connected');
+            } else {
+              this.error = true;
+              console.log('The connection is down.');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
     },
+    //
+    // //automatically refresh the latest connection status
+    // checkConnectionStatus() {
+    //   fetch('http://localhost:8081/connectServer')
+    //       .then(response => {
+    //         if (response.ok) {
+    //           this.connectionStatus = 'Connected';
+    //         } else {
+    //           this.connectionStatus = 'Down';
+    //         }
+    //       })
+    //       .catch(error => {
+    //         this.connectionStatus = 'Error';
+    //         console.error('Error:', error);
+    //       });
+    // },
 
     add_sub() {
       this.showAddSubForm = true;
     },
     confirmAddSub() {
       const formData = new FormData();
-      formData.append('parent', this.newSubNodeParent);
+      formData.append('parent', this.selectedNode.remark);
       formData.append('ip', this.newSubNodeIp);
       formData.append('port', this.newSubNodePort);
 
@@ -230,12 +379,12 @@ export default {
       })
           .then(response => response.json())
           .then(data => {
-            console.log('添加子节点成功:', data);
+            console.log('Success adding new sub node:', data);
             this.showAddSubForm = false;
             this.nodeDetails();
           })
           .catch(error => {
-            console.error('添加子节点失败:', error);
+            console.error('Error:', error);
           });
 
     },
@@ -250,8 +399,8 @@ export default {
     },
     confirmDelete() {
       const formData = new FormData();
-      formData.append('parent', this.deleteForm.parent);
-      formData.append('address', this.deleteForm.address);
+      formData.append('parent', this.selectedNode.remark);
+      formData.append('address', this.deleteAddress);
 
       fetch('http://localhost:8081/removeAddress', {
         method: 'POST',
@@ -259,23 +408,40 @@ export default {
       })
           .then(response => response.json())
           .then(data => {
-            console.log('删除地址成功:', data);
+            console.log('Success delete:', data);
             this.showDeleteForm = false;
             this.nodeDetails();
           })
           .catch(error => {
-            console.error('删除地址失败:', error);
+            console.error('Error:', error);
           });
     },
     cancelDelete() {
       this.showDeleteForm = false;
-      this.deleteForm.parent = '';
-      this.deleteForm.address = '';
+      this.deleteAddress = '';
+    },
+    clear_sub(){
+      const formData = new FormData();
+      formData.append('parent', this.selectedNode.remark);
+      fetch('http://localhost:8081/removeChildren', {
+        method: 'POST',
+        body: formData
+      })
+          .then(response => {
+            if (response.ok) {
+              console.log('Children removed successfully.');
+            } else {
+              console.error('Failed to remove children.');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
     },
     filterNodes() {
       const searchText = this.searchText.toLowerCase();
       return this.nodeList.filter(node => {
-        return node.remark.toLowerCase().includes(searchText) || node.localhost.toLowerCase().includes(searchText);
+        return node.remark.toLowerCase().includes(searchText);
       });
     }
   },
@@ -289,6 +455,7 @@ export default {
 </script>
 
 <style scoped>
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css");
 .container {
   display: flex;
   justify-content: space-between;
@@ -339,6 +506,32 @@ export default {
 .add-node el-input {
   margin-bottom: 10px;
 }
+
+.add-sub-form > el-input {
+  width: 60%;
+}
+
+.delete-form > el-input {
+  width: 60%;
+}
+
+.monitor-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 每行两列，列宽相等 */
+  gap: 10px; /* 格子之间的间距 */
+  padding: 10px;
+}
+
+.monitor-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #cbcbcb;
+  padding: 10px;
+  text-align: center;
+}
+
 </style>
 
 

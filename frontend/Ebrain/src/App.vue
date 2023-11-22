@@ -5,7 +5,8 @@ import { RouterLink, RouterView } from 'vue-router'
 
 <template>
   <div>
-    <template v-if="!isLoggedIn" class="login-container">
+    <template v-if="!isLoggedIn">
+      <div class="login-container">
       <header>
         <div class="login-box">
           <h1>Login Page</h1>
@@ -22,14 +23,15 @@ import { RouterLink, RouterView } from 'vue-router'
           </form>
         </div>
       </header>
+      </div>
     </template>
     <template v-else>
       <header>
         <div class="common-layout">
           <el-container>
             <el-aside width="200px">
-              <h1>Ebrain</h1>
-              <el-menu default-active="3" class="el-menu-vertical-demo">
+              <h1 style="text-align: center;color:#ffffff;background-color: #77ace0">Ebrain</h1>
+              <el-menu default-active="3" class="el-menu-vertical-demo" :style="{background: '#ffffff', boxShadow: '0 2px 3px 2px rgba(0,0,0,.1)'}">
                 <el-menu-item index="1" @click="$router.push('/admin')">ZooKeeper</el-menu-item>
                 <el-menu-item index="2" @click="$router.push('/ApiTester')">API</el-menu-item>
                 <el-menu-item index="3" @click="$router.push('/log')">Log</el-menu-item>
@@ -49,7 +51,7 @@ import { RouterLink, RouterView } from 'vue-router'
 export default {
   data() {
     return {
-      isLoggedIn: true,
+      isLoggedIn: false,
       username: '',
       password: ''
     };
@@ -130,4 +132,5 @@ export default {
   cursor: pointer;
   margin-top: 10px;
 }
+
 </style>

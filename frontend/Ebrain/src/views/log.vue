@@ -1,7 +1,8 @@
 <template>
   <div>
     <h1>Log</h1>
-    <button @click="clearLog">Clean Log</button>
+    <el-button @click="clearLog" >Clean Log</el-button>
+
     <div class="log-content">
       <pre>{{ log }}</pre>
     </div>
@@ -21,11 +22,16 @@ export default {
   methods: {
     getLog() {
       fetch('http://localhost:8081/getLog')
+          // .then(response => response.json())
+          // .then(data => {
+          //   if (data.success) {
+          //     this.log = data.log;
+          //   }
+          // })
           .then(response => response.json())
           .then(data => {
-            if (data.success) {
-              this.log = data.log;
-            }
+            console.log(data);
+            this.log=data;
           })
           .catch(error => {
             console.error('Error:', error);
