@@ -14,7 +14,7 @@
 export default {
   data() {
     return {
-      log: ''
+      log: []
     };
   },
   methods: {
@@ -34,7 +34,7 @@ export default {
       fetch('http://localhost:8081/clearLog', { method: 'POST' })
           .then(response => {
             if (response.ok) {
-              this.log = '';
+              this.log = [];
               console.log('Log Cleaned');
               this.log = 'Log Cleaned.';
             } else {

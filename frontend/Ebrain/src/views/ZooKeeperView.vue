@@ -287,7 +287,7 @@ export default {
       formData.append('ip', this.reIP);
       formData.append('port', this.rePort);
 
-      fetch('http://localhost:8081/http://localhost:8081/getDetailNodeInformation', {
+      fetch('http://localhost:8081/getDetailNodeInformation', {
         method: 'POST',
         body: formData
       })
@@ -351,6 +351,7 @@ export default {
             if (response.ok) {
               this.success = true;
               this.iconTypeC='bi bi-cloud-check-fill';
+              this.fetchNodeList();
               console.log('Connected');
             } else {
               this.error = true;
@@ -370,7 +371,7 @@ export default {
 
       fetch('http://localhost:8081/socketTest', {
         method: 'POST',
-            body: formData
+        body: formData
       })
           .then(response => {
             if (response.ok) {
@@ -474,7 +475,9 @@ export default {
           });
     },
     fetchNodeList() {
-      fetch('http://localhost:8081/getAllParentNodes')
+      fetch('http://localhost:8081/getAllParentNodes',{
+        method: 'POST'
+      })
           .then(response => response.json())
           .then(data => {
             this.nodeList = data.map(nodeName => ({ remark: nodeName }));
