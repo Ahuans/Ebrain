@@ -173,6 +173,9 @@ export default {
   //     this.checkConnectionStatus();
   //   }, 5000);
   // },
+  mounted() {
+    this.fetchNodeList();
+  },
   methods: {
     addNode() {
       if (this.newNodeRemark) {
@@ -181,10 +184,10 @@ export default {
           remark: this.newNodeRemark,
           text: ''
         };
-
+        console.log('push done');
         const formData = new FormData();
         formData.append('parent', newNode.remark);
-
+        console.log('append done');
         fetch('http://localhost:8081/addParent', {
           method: 'POST',
           body: formData
@@ -203,6 +206,7 @@ export default {
               console.error('Error:', error);
               this.iconTypeAdd='bi bi-question-circle-fill';
             });
+        console.log('send done');
       }
     },
     closeDrawer() {
@@ -467,6 +471,16 @@ export default {
           })
           .catch(error => {
             console.error('Error:', error);
+          });
+    },
+    fetchNodeList() {
+      fetch('http://localhost:8081/getAllParentNodes')
+          .then(response => response.json())
+          .then(data => {
+            this.nodeList = data.map(nodeName => ({ remark: nodeName }));
+          })
+          .catch(error => {
+            console.error('Failed to fetch parent nodes:', error);
           });
     },
     filterNodes() {
