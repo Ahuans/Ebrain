@@ -132,13 +132,7 @@
 export default {
   data() {
     return {
-      nodeList: [
-        {
-          id: 1,
-          remark: 'Node 1',
-          text: ''
-        }
-      ],
+      nodeList: [],
       newNodeRemark: '',
       selectedNode: null,
       searchText: '',

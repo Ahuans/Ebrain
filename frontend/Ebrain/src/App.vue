@@ -49,7 +49,7 @@ import { RouterLink, RouterView } from 'vue-router'
 export default {
   data() {
     return {
-      isLoggedIn: true,
+      isLoggedIn: false,
       username: '',
       password: ''
     };
