@@ -530,9 +530,9 @@ export default {
   margin-bottom: 20px;
 }
 
-//.add-node {
-//  margin-top: 20px;
-//}
+.add-node {
+  margin-top: 20px;
+}
 
 .add-node el-input {
   margin-bottom: 10px;
