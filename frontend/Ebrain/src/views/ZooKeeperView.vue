@@ -2,27 +2,27 @@
   <header :style="{background: '#fff', boxShadow: '0 2px 3px 2px rgba(0,0,0,.1)'}">
     <div class="monitor-container">
       <div class="monitor-item">
-        <i class="bi bi-cloud-arrow-up" style="font-size: 70px;"></i>
+        <i :class="iconTypeC" style="font-size: 70px;"></i>
         <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 10px;">
-          <el-input v-model="connectPort" placeholder="Enter port No." style="width: 200px;" />
+          <el-input v-model="connectPort" @focus="iconTypeC = 'bi bi-cloud-arrow-up'" placeholder="Enter port No." style="width: 200px;" />
           <br />
           <el-button @click="connectNode" type="primary">Connect</el-button>
         </div>
       </div>
       <div class="monitor-item">
-        <i class="bi bi-plus-circle" style="font-size: 70px;"></i>
+        <i :class="iconTypeAdd" style="font-size: 70px;"></i>
         <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 10px;">
-          <el-input v-model="newNodeRemark" ref="remarkInput" placeholder="Enter parent name" style="width: 200px;" />
+          <el-input v-model="newNodeRemark" @focus="iconTypeAdd = 'bi bi-plus-circle'" ref="remarkInput" placeholder="Enter parent name" style="width: 200px;" />
           <br />
           <el-button @click="addNode" type="primary">Add</el-button>
         </div>
       </div>
       <div class="monitor-item">
 <!--        <i :class="bi bi-cloud-check" style="font-size: 70px;"></i>-->
-        <i :class="iconType" style="font-size: 70px;"></i>
+        <i :class="iconTypeCS" style="font-size: 70px;"></i>
         <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 10px;">
-          <el-input v-model="connectionIP" placeholder="Enter ip address" style="width: 200px;" />
-          <el-input v-model="connectionPort"  placeholder="Enter port no." style="width: 200px;" />
+          <el-input v-model="connectionIP" @focus="iconTypeCS = 'bi bi-cloud'" placeholder="Enter ip address" style="width: 200px;" />
+          <el-input v-model="connectionPort"  @focus="iconTypeCS = 'bi bi-cloud'" placeholder="Enter port no." style="width: 200px;" />
           <br />
           <el-button @click="checkConnectionStatus" type="primary">Check</el-button>
         </div>
@@ -149,7 +149,9 @@ export default {
       connectionStatus: '',
       connectionIP:'',
       connectionPort:'',
-      iconType:'bi bi-cloud',
+      iconTypeCS:'bi bi-cloud',
+      iconTypeC:'bi bi-cloud-arrow-up',
+      iconTypeAdd:'bi bi-plus-circle',
       connectPort:'',
       loading: true,
       success: false,
@@ -192,13 +194,14 @@ export default {
                 console.log('Success Add Node');
                 this.nodeList.push(newNode);
                 this.$refs.remarkInput.focus();
-                this.newNodeRemark = '';
               } else {
                 console.error('Fail');
+                this.iconTypeAdd='bi bi-x-circle-fill';
               }
             })
             .catch(error => {
               console.error('Error:', error);
+              this.iconTypeAdd='bi bi-question-circle-fill';
             });
       }
     },
@@ -343,13 +346,16 @@ export default {
           .then(response => {
             if (response.ok) {
               this.success = true;
+              this.iconTypeC='bi bi-cloud-check-fill';
               console.log('Connected');
             } else {
               this.error = true;
+              this.iconTypeC='bi bi-x-circle-fill';
               console.log('The connection is down.');
             }
           })
           .catch(error => {
+            this.iconTypeC='bi bi-cloud-slash'
             console.error('Error:', error);
           });
     },
@@ -365,15 +371,15 @@ export default {
           .then(response => {
             if (response.ok) {
               this.connectionStatus = 'Connected';
-              this.iconType='bi bi-cloud-check'
+              this.iconTypeCS='bi bi-cloud-check'
             } else {
               this.connectionStatus = 'Down';
-              this.iconType='bi bi-cloud-minus'
+              this.iconTypeCS='bi bi-cloud-minus'
             }
           })
           .catch(error => {
             this.connectionStatus = 'Error';
-            this.iconType='bi bi-cloud-slash'
+            this.iconTypeCS='bi bi-cloud-slash'
             console.error('Error:', error);
           });
     },

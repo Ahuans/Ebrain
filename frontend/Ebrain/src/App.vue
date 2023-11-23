@@ -49,7 +49,8 @@ import { RouterLink, RouterView } from 'vue-router'
 export default {
   data() {
     return {
-      isLoggedIn: false,
+      isLoggedIn: true,
+      // isLoggedIn: false,
       username: '',
       password: ''
     };
