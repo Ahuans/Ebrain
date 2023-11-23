@@ -10,17 +10,15 @@ import { RouterLink, RouterView } from 'vue-router'
       <header>
         <div class="login-box">
           <h1>Login Page</h1>
-          <form>
             <div class="form-group">
               <label for="username" class="input-label">Username:</label>
-              <input type="text" id="username" class="input-field" required>
+              <el-input type="text" v-model="username" class="input-field" required/>
             </div>
             <div class="form-group">
               <label for="password" class="input-label">Password:</label>
-              <input type="password" id="password" class="input-field" required>
+              <el-input type="password" v-model="password" class="input-field" required/>
             </div>
-            <button type="submit" class="login-button" @click="login">Login</button>
-          </form>
+            <el-button type="primary" class="login-button" @click="login">Login</el-button>
         </div>
       </header>
       </div>
@@ -51,7 +49,7 @@ import { RouterLink, RouterView } from 'vue-router'
 export default {
   data() {
     return {
-      isLoggedIn: false,
+      isLoggedIn: true,
       username: '',
       password: ''
     };
@@ -70,6 +68,7 @@ export default {
 
         if (response.ok) {
           this.isLoggedIn = true;
+          this.$router.push('/admin');
           console.log('Login successful');
         } else {
           console.error('Login failed. Please check your credentials');

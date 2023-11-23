@@ -134,7 +134,7 @@ export default {
       searchText: '',
       isEditing: false,
       responseData: [],
-      nodeDetails: '',
+      nodeDetails: [],
       nodeDetailsLoading: false,
       showAddSubForm: false,
       newSubNodeParent: '',
@@ -277,7 +277,7 @@ export default {
         method: 'POST',
         body: formData
       })
-          .then(response => response.text())
+          .then(response => response.json)
           .then(data => {
             this.showReForm = false;
             this.nodeDetailsLoading = false;
@@ -329,7 +329,7 @@ export default {
     // actively check connection,
     connectNode() {
       const formData = new FormData();
-      formData.append('connectPort', this.connectPort);
+      formData.append('port', this.connectPort);
       fetch('http://localhost:8081/connectServer', {
         method: 'POST',
         body: formData
@@ -377,11 +377,15 @@ export default {
         method: 'POST',
         body: formData
       })
-          .then(response => response.json())
-          .then(data => {
-            console.log('Success adding new sub node:', data);
-            this.showAddSubForm = false;
-            this.nodeDetails();
+          .then(response => {
+            if (response.ok) {
+              console.log('Success adding new sub node');
+              this.showAddSubForm = false;
+              this.getSubNodes(this.selectedNode.remark);
+              this.nodeDetails();
+            } else {
+              console.error('Failed.');
+            }
           })
           .catch(error => {
             console.error('Error:', error);
@@ -406,11 +410,16 @@ export default {
         method: 'POST',
         body: formData
       })
-          .then(response => response.json())
-          .then(data => {
-            console.log('Success delete:', data);
-            this.showDeleteForm = false;
-            this.nodeDetails();
+          .then(response => {
+            if (response.ok) {
+              console.log('Success delete');
+              this.showDeleteForm = false;
+              this.getSubNodes(this.selectedNode.remark);
+              this.nodeDetails();
+
+            } else {
+              console.error('Failed.');
+            }
           })
           .catch(error => {
             console.error('Error:', error);
@@ -430,6 +439,8 @@ export default {
           .then(response => {
             if (response.ok) {
               console.log('Children removed successfully.');
+              this.getSubNodes(this.selectedNode.remark);
+              this.nodeDetails();
             } else {
               console.error('Failed to remove children.');
             }
