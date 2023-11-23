@@ -2,7 +2,7 @@
   <header :style="{background: '#fff', boxShadow: '0 2px 3px 2px rgba(0,0,0,.1)'}">
     <div class="monitor-container">
       <div class="monitor-item">
-        <i class="bi bi-hourglass-split" style="font-size: 70px;"></i>
+        <i class="bi bi-cloud-arrow-up" style="font-size: 70px;"></i>
         <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 10px;">
           <el-input v-model="connectPort" placeholder="Enter port No." style="width: 200px;" />
           <br />
@@ -15,6 +15,16 @@
           <el-input v-model="newNodeRemark" ref="remarkInput" placeholder="Enter parent name" style="width: 200px;" />
           <br />
           <el-button @click="addNode" type="primary">Add</el-button>
+        </div>
+      </div>
+      <div class="monitor-item">
+<!--        <i :class="bi bi-cloud-check" style="font-size: 70px;"></i>-->
+        <i :class="iconType" style="font-size: 70px;"></i>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 10px;">
+          <el-input v-model="connectionIP" placeholder="Enter ip address" style="width: 200px;" />
+          <el-input v-model="connectionPort"  placeholder="Enter port no." style="width: 200px;" />
+          <br />
+          <el-button @click="checkConnectionStatus" type="primary">Check</el-button>
         </div>
       </div>
     </div>
@@ -143,6 +153,9 @@ export default {
       showDeleteForm: false,
       deleteAddress: '',
       connectionStatus: '',
+      connectionIP:'',
+      connectionPort:'',
+      iconType:'bi bi-cloud',
       connectPort:'',
       loading: true,
       success: false,
@@ -326,7 +339,6 @@ export default {
     //   this.isEditing = false;
     // },
 
-    // actively check connection,
     connectNode() {
       const formData = new FormData();
       formData.append('port', this.connectPort);
@@ -347,22 +359,30 @@ export default {
             console.error('Error:', error);
           });
     },
-    //
-    // //automatically refresh the latest connection status
-    // checkConnectionStatus() {
-    //   fetch('http://localhost:8081/connectServer')
-    //       .then(response => {
-    //         if (response.ok) {
-    //           this.connectionStatus = 'Connected';
-    //         } else {
-    //           this.connectionStatus = 'Down';
-    //         }
-    //       })
-    //       .catch(error => {
-    //         this.connectionStatus = 'Error';
-    //         console.error('Error:', error);
-    //       });
-    // },
+    checkConnectionStatus() {
+      const formData = new FormData();
+      formData.append('ip', this.connectionIP);
+      formData.append('port', this.connectionPort);
+
+      fetch('http://localhost:8081/socketTest', {
+        method: 'POST',
+            body: formData
+      })
+          .then(response => {
+            if (response.ok) {
+              this.connectionStatus = 'Connected';
+              this.iconType='bi bi-cloud-check'
+            } else {
+              this.connectionStatus = 'Down';
+              this.iconType='bi bi-cloud-minus'
+            }
+          })
+          .catch(error => {
+            this.connectionStatus = 'Error';
+            this.iconType='bi bi-cloud-slash'
+            console.error('Error:', error);
+          });
+    },
 
     add_sub() {
       this.showAddSubForm = true;
@@ -510,9 +530,9 @@ export default {
   margin-bottom: 20px;
 }
 
-.add-node {
-  margin-top: 20px;
-}
+//.add-node {
+//  margin-top: 20px;
+//}
 
 .add-node el-input {
   margin-bottom: 10px;
@@ -528,8 +548,8 @@ export default {
 
 .monitor-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 每行两列，列宽相等 */
-  gap: 10px; /* 格子之间的间距 */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
   padding: 10px;
 }
 
