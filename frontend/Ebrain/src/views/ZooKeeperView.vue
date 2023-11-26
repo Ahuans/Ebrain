@@ -39,21 +39,21 @@
         <div class="node-item" v-for="node in filteredNodeList" :key="node.id">
           <span @click="selectNode(node)">{{ node.remark }}</span>
           <el-button type="primary" @click="deleteNode(node)" style="display: flex">Delete</el-button>
-          <el-button type="primary" @click="showDrawer=true">Edit</el-button>
-          <el-drawer title="Edit Node" v-model="showDrawer" @close="closeDrawer" direction="ttb">
-            <el-form ref="editForm" :model="editForm" label-width="120px">
-              <el-form-item label="Address Before">
-                <el-input v-model="editForm.addressBefore"></el-input>
-              </el-form-item>
-              <el-form-item label="Address After">
-                <el-input v-model="editForm.addressAfter"></el-input>
-              </el-form-item>
-              <el-form-item>
-                <el-button @click="cancelEdit">Cancel</el-button>
-                <el-button type="primary" @click="editAddress(node)">Submit</el-button>
-              </el-form-item>
-            </el-form>
-          </el-drawer>
+<!--          <el-button type="primary" @click="showDrawer=true">Edit</el-button>-->
+<!--          <el-drawer title="Edit Node" v-model="showDrawer" @close="closeDrawer" direction="ttb">-->
+<!--            <el-form ref="editForm" :model="editForm" label-width="120px">-->
+<!--              <el-form-item label="Address Before">-->
+<!--                <el-input v-model="editForm.addressBefore"></el-input>-->
+<!--              </el-form-item>-->
+<!--              <el-form-item label="Address After">-->
+<!--                <el-input v-model="editForm.addressAfter"></el-input>-->
+<!--              </el-form-item>-->
+<!--              <el-form-item>-->
+<!--                <el-button @click="cancelEdit">Cancel</el-button>-->
+<!--                <el-button type="primary" @click="editAddress(node)">Submit</el-button>-->
+<!--              </el-form-item>-->
+<!--            </el-form>-->
+<!--          </el-drawer>-->
         </div>
       </div>
     </div>
@@ -78,7 +78,21 @@
           <h3>Sub Nodes Information:</h3>
           <el-collapse v-if="subNodes.length > 0">
           <el-collapse-item v-for="subNode in subNodes" :key="subNode" :title="subNode">
-            {{ subNode }}
+            <el-button type="primary" @click="showDrawer=true">Edit</el-button>
+            <el-drawer title="Edit Node" v-model="showDrawer" @close="closeDrawer" direction="ttb">
+              <el-form ref="editForm" :model="editForm" label-width="120px">
+                <el-form-item label="Address Before">
+                  <el-input v-model="editForm.addressBefore"></el-input>
+                </el-form-item>
+                <el-form-item label="Address After">
+                  <el-input v-model="editForm.addressAfter"></el-input>
+                </el-form-item>
+                <el-form-item>
+                  <el-button @click="cancelEdit">Cancel</el-button>
+                  <el-button type="primary" @click="editAddress(node)">Submit</el-button>
+                </el-form-item>
+              </el-form>
+            </el-drawer>
           </el-collapse-item>
           </el-collapse>
 <!--          <el-button type="primary" v-if="isEditing" @click="saveNode">Save</el-button>-->
@@ -173,9 +187,9 @@ export default {
   //     this.checkConnectionStatus();
   //   }, 5000);
   // },
-  mounted() {
-    this.fetchNodeList();
-  },
+  // mounted() {
+  //   this.fetchNodeList();
+  // },
   methods: {
     addNode() {
       if (this.newNodeRemark) {
@@ -197,6 +211,7 @@ export default {
                 console.log('Success Add Node');
                 this.nodeList.push(newNode);
                 this.$refs.remarkInput.focus();
+                this.newNodeRemark = '';
               } else {
                 console.error('Fail');
                 this.iconTypeAdd='bi bi-x-circle-fill';
@@ -291,7 +306,7 @@ export default {
         method: 'POST',
         body: formData
       })
-          .then(response => response.json)
+          .then(response => response.json())
           .then(data => {
             this.showReForm = false;
             this.nodeDetailsLoading = false;
@@ -352,6 +367,7 @@ export default {
               this.success = true;
               this.iconTypeC='bi bi-cloud-check-fill';
               this.fetchNodeList();
+              this.connectPort = '';
               console.log('Connected');
             } else {
               this.error = true;
@@ -376,7 +392,9 @@ export default {
           .then(response => {
             if (response.ok) {
               this.connectionStatus = 'Connected';
-              this.iconTypeCS='bi bi-cloud-check'
+              this.iconTypeCS='bi bi-cloud-check';
+              this.connectionIP = '';
+              this.connectionPort = '';
             } else {
               this.connectionStatus = 'Down';
               this.iconTypeCS='bi bi-cloud-minus'

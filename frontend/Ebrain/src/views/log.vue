@@ -19,7 +19,7 @@ export default {
   },
   methods: {
     getLog() {
-      fetch('http://localhost:8081/getLog')
+      fetch('http://localhost:8081/getLog',{ method: 'POST' })
           .then(response => response.json())
           .then(data => {
             console.log(data);
