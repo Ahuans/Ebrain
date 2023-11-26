@@ -81,15 +81,15 @@
             <el-button type="primary" @click="showDrawer=true">Edit</el-button>
             <el-drawer title="Edit Node" v-model="showDrawer" @close="closeDrawer" direction="ttb">
               <el-form ref="editForm" :model="editForm" label-width="120px">
-                <el-form-item label="Address Before">
-                  <el-input v-model="editForm.addressBefore"></el-input>
-                </el-form-item>
+<!--                <el-form-item label="Address Before">-->
+<!--                  <el-input v-model="editForm.addressBefore"></el-input>-->
+<!--                </el-form-item>-->
                 <el-form-item label="Address After">
                   <el-input v-model="editForm.addressAfter"></el-input>
                 </el-form-item>
                 <el-form-item>
                   <el-button @click="cancelEdit">Cancel</el-button>
-                  <el-button type="primary" @click="editAddress(node)">Submit</el-button>
+                  <el-button type="primary" @click="editAddress(subNode)">Submit</el-button>
                 </el-form-item>
               </el-form>
             </el-drawer>
@@ -235,10 +235,10 @@ export default {
     cancelEdit() {
       this.closeDrawer();
     },
-    editAddress(node){
+    editAddress(subNode){
       const formData = new FormData();
-      formData.append('parent', node.remark);
-      formData.append('addressBefore', this.editForm.addressBefore);
+      formData.append('parent', this.selectedNode.remark);
+      formData.append('addressBefore', subNode);
       formData.append('addressAfter', this.editForm.addressAfter);
 
 
@@ -248,6 +248,7 @@ export default {
       })
           .then(response => {
             if (response.ok) {
+              this.fetchNodeList();
               console.log('Update successful');
             } else {
               console.error('Update failed');
