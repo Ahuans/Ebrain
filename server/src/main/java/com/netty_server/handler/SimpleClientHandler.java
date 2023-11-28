@@ -1,14 +1,7 @@
-package com.whx.netty_server.handler;
-
-import javax.swing.text.MaskFormatter;
-
-import com.alibaba.fastjson.JSONObject;
-import com.whx.netty_server.client.DefaultFuture;
-import com.whx.netty_server.client.Response;
+package com.netty_server.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.util.AttributeKey;
 
 public class SimpleClientHandler extends ChannelInboundHandlerAdapter {
@@ -22,9 +15,8 @@ public class SimpleClientHandler extends ChannelInboundHandlerAdapter {
 				ctx.channel().writeAndFlush("ping\r\n");
 				return;
 			}
-//			ctx.channel().attr(AttributeKey.valueOf("sssss")).set(msg);
-			Response response=JSONObject.parseObject(msg.toString(),Response.class);
-			DefaultFuture .receive(response);
+			ctx.channel().attr(AttributeKey.valueOf("sssss")).set(msg);
+			ctx.channel().close();
 		}
 }
 	

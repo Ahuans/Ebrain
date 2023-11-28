@@ -1,15 +1,13 @@
-package com.whx.netty_server.client;
+package com.netty_server.client;
 
 
 
-import com.whx.netty_server.handler.SimpleClientHandler;
+import com.netty_server.constants.Constants;
+import com.netty_server.factory.ZookeeperFactory;
+import com.netty_server.handler.SimpleClientHandler;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoop;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -18,40 +16,119 @@ import io.netty.handler.codec.Delimiters;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.AttributeKey;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.api.CuratorWatcher;
+
+import java.util.List;
 
 public class NettyClient {
-	public static void main(String[] args) throws InterruptedException {
-		String host = "localhost";
-        int port = 8060;
+     static final Bootstrap b=new Bootstrap();
+     ChannelFuture future=null;
+    //static Set<String> realServerPath=new HashSet<>();
+    NettyClient(String parent) {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        
+        b.group(workerGroup); // (2)
+        b.channel(NioSocketChannel.class); // (3)
+        b.option(ChannelOption.SO_KEEPALIVE, true); // (4)
+        b.handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            public void initChannel(SocketChannel ch) throws Exception {
+                ch.pipeline().addLast(new DelimiterBasedFrameDecoder(Integer.MAX_VALUE,Delimiters.lineDelimiter()[0]));
+                ch.pipeline().addLast(new StringDecoder());
+                ch.pipeline().addLast(new SimpleClientHandler());
+                ch.pipeline().addLast(new StringEncoder());
+            }
+        });
+
+        // Start the client.
+
+//        try {
+//            CuratorFramework curatorFramework=ZookeeperFactory.create();
+//            List<String> serverPaths=curatorFramework.getChildren().forPath(Constants.Server_PATH);
+//            //加上zk监听服务器变化
+//            CuratorWatcher watcher=new ServerWathcer();
+//
+//            curatorFramework.getChildren().usingWatcher(watcher).forPath(Constants.Server_PATH);
+//
+//            for(String serverPath:serverPaths)
+//            {
+//                String[] str=serverPath.split("#");
+//                ChannelManager.realServerPath.add(str[0]+"#"+str[1]);
+//                ChannelFuture channelFuture=b.connect(str[0],Integer.valueOf(str[1])).sync();
+//                ChannelManager.add(channelFuture);
+//            }
+
+//            if(ChannelManager.realServerPath.size()>0)
+//            {
+//                String[] hostAndPort=ChannelManager.realServerPath.toArray()[0].toString().split("#");
+//                host=hostAndPort[0];
+//                port=Integer.valueOf(hostAndPort[1]) ;
+//            }
+
+//        } catch (Exception e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+
+
+    }
+
+    public void connectDirectly(String parent,String ip,int port)
+    {
         try {
-            Bootstrap b = new Bootstrap(); // (1)
-            b.group(workerGroup); // (2)
-            b.channel(NioSocketChannel.class); // (3)
-            b.option(ChannelOption.SO_KEEPALIVE, true); // (4)
-            b.handler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                public void initChannel(SocketChannel ch) throws Exception {
-                    ch.pipeline().addLast(new DelimiterBasedFrameDecoder(Integer.MAX_VALUE,Delimiters.lineDelimiter()[0]));
-                    ch.pipeline().addLast(new StringDecoder());
-                	ch.pipeline().addLast(new SimpleClientHandler());
-                	ch.pipeline().addLast(new StringEncoder());
-                }
-            });
-            
-            // Start the client.
-            ChannelFuture f = b.connect(host, port).sync(); // (5)
-            f.channel().writeAndFlush("hello server");
-            f.channel().writeAndFlush("\r\n"); 
-            // Wait until the connection is closed.
-            f.channel().closeFuture().sync();
-            Object result=f.channel().attr(AttributeKey.valueOf("sssss")).get();
-			System.out.println("获取到服务器数据"+result);
-        
+            ZookeeperFactory.initialCreate("localhost:2181");
+            CuratorFramework curatorFramework = ZookeeperFactory.create();
+
+        }catch (Exception e)
+        {
+            System.out.println(e);
         }
-        finally {
-            workerGroup.shutdownGracefully();
+    }
+    public void sendDirectly(String host,int port,String message)
+    {
+        try {
+            future = b.connect(host, port).sync();
+            future.channel().writeAndFlush(message +"\r\n");
+            future.channel().closeFuture().sync();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
-	}
+        Object result=future.channel().attr(AttributeKey.valueOf("sssss")).get();
+        System.out.println("获取到服务器数据"+result);
+    }
+    public void connectByZookeeper(String parent,String ip,String port)
+    {
+        try {
+            CuratorFramework curatorFramework = ZookeeperFactory.create();
+            List<String> serverPaths = curatorFramework.getChildren().forPath("/"+parent);
+            //加上zk监听服务器变化
+            CuratorWatcher watcher = new ServerWathcer();
+
+            curatorFramework.getChildren().usingWatcher(watcher).forPath("/"+parent);
+
+            for (String serverPath : serverPaths) {
+                String[] str = serverPath.split("#");
+                ChannelManager.realServerPath.add(str[0] + "#" + str[1]);
+                ChannelFuture channelFuture = b.connect(str[0], Integer.valueOf(str[1])).sync();
+                ChannelManager.add(channelFuture);
+            }
+        }
+        catch (Exception e) {
+                // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    public void sendByZookeeper(String message)
+    {
+        future=ChannelManager.get(ChannelManager.position);
+        try{
+            future.channel().writeAndFlush(message +"\r\n");
+            future.channel().closeFuture().sync();
+        }
+        catch (Exception e) {}
+        Object result=future.channel().attr(AttributeKey.valueOf("sssss")).get();
+        System.out.println("获取到服务器数据"+result);
+    }
+
 }
+

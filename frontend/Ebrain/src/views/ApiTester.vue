@@ -54,9 +54,12 @@
     </el-col>
   </el-row>
   <!--Result preview area -->
-  <el-row>
+  <el-row align="middle">
     <el-col :span="2">
       <p>Result</p>
+    </el-col>
+    <el-col :span="1">
+      <el-button type="primary" @Click="Savefile">Save</el-button>
     </el-col>
     <el-col :span="2" :offset="18">
       <p>Time : {{ requestTime }} ms</p>
@@ -130,6 +133,15 @@ export default {
 
     /**
      * Send the api request to own backend and get the result in Json
+     * @param {json} tabInfo {
+        index: val,
+        url: '',
+        api_method: API_METHOD[0],
+        headers: [],
+        query: [],
+        body: [],
+        requestTime: 0,
+        result: ''}
      */
     async function AccessAPI(tabInfo) {
       let header = TableToJson(tabInfo.headers)
@@ -156,9 +168,8 @@ export default {
             restBody: body
           }
         })
-        tabInfo.result = response.data.data
+        tabInfo.result = ParseData(response.data.header,response.data.data)
         //result.value = response.data.data
-        console.log(response.data.header['content-type'])
         console.log(tabInfo.result)
       } catch (error) {
         console.log(error)
@@ -170,11 +181,38 @@ export default {
 
     /**
      * @param {string} format
+     * @param {JSON} data
      */
-    function ParseData(format) {
+    function ParseData(format,data) {
       //todo
-      format = format.match('\/{1}([a-zA-Z]*)')
+      //format = format.match('\/{1}([a-zA-Z]*)')[0]
+      console.log("format")
+      console.log(format)
       //html
+      switch (format) {
+        case '/json':{
+          console.log("Json")
+          return JSON.stringify(data)
+        }
+        case '/html':{
+          console.log("html")
+          var tab = '\t'
+          var result = ''
+          var indent = ''
+          data.split(/>\s*</).forEach(function (element) {
+            if (element.match(/^\/\w/)) {
+              indent = indent.substring(tab.length)
+            }
+            result += indent + '<' + element + '>\r\n'
+            if (element.match(/^<?\w[^>]*[^\/]$/) && !element.startsWith('input')) {
+              indent += tab
+            }
+          })
+          return result.substring(1, result.length - 3)
+        }
+      }
+      console.log("null")
+      return ""
       //js
     }
 
@@ -279,6 +317,19 @@ export default {
       SetupTab(targetTab)
     }
 
+    function Savefile() {
+      const blob = new Blob([result.value], { type: 'text/plain' })
+
+      const url = URL.createObjectURL(blob)
+
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'Outfile.txt')
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+
     return {
       targetURL,
       selected_API_Method,
@@ -299,7 +350,8 @@ export default {
       HandleTabsEdit,
       SwtichTab,
       currentTab,
-      requestTime
+      requestTime,
+      Savefile
     }
   },
   mounted() {
@@ -327,7 +379,7 @@ export default {
         this.result = this.currentTab.result
         this.requestTime = this.currentTab.requestTime
       },
-      deep:true
+      deep: true
     }
   }
 }
