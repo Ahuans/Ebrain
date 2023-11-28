@@ -18,7 +18,6 @@
         </div>
       </div>
       <div class="monitor-item">
-<!--        <i :class="bi bi-cloud-check" style="font-size: 70px;"></i>-->
         <i :class="iconTypeCS" style="font-size: 70px;"></i>
         <div style="display: flex; flex-direction: column; align-items: flex-start; margin-top: 10px;">
           <el-input v-model="connectionIP" @focus="iconTypeCS = 'bi bi-cloud'" placeholder="Enter ip address" style="width: 200px;" />
@@ -93,6 +92,7 @@
                 </el-form-item>
               </el-form>
             </el-drawer>
+            <el-button type="primary" @click="confirmDelete(subNode)">Delete</el-button>
           </el-collapse-item>
           </el-collapse>
 <!--          <el-button type="primary" v-if="isEditing" @click="saveNode">Save</el-button>-->
@@ -111,12 +111,12 @@
             <el-button type="text" @click="cancelAddSub">Cancel</el-button>
           </div>
           <br>
-          <div v-if="showDeleteForm" class="delete-form">
-  <!--          <el-input v-model="deleteForm.parent" placeholder="Parent" :style="{ width: '50%' }"/><br>-->
-            <el-input v-model="deleteAddress" placeholder="Address" :style="{ width: '50%' }"/><br><br>
-            <el-button type="primary" @click="confirmDelete">Confirm</el-button>
-            <el-button type="text" @click="cancelDelete">Cancel</el-button>
-          </div>
+<!--          <div v-if="showDeleteForm" class="delete-form">-->
+<!--  &lt;!&ndash;          <el-input v-model="deleteForm.parent" placeholder="Parent" :style="{ width: '50%' }"/><br>&ndash;&gt;-->
+<!--            <el-input v-model="deleteAddress" placeholder="Address" :style="{ width: '50%' }"/><br><br>-->
+<!--            <el-button type="primary" @click="confirmDelete">Confirm</el-button>-->
+<!--            <el-button type="text" @click="cancelDelete">Cancel</el-button>-->
+<!--          </div>-->
         </div>
         <div>
           <h3>Node Details</h3>
@@ -241,14 +241,13 @@ export default {
       formData.append('addressBefore', subNode);
       formData.append('addressAfter', this.editForm.addressAfter);
 
-
       fetch('http://localhost:8081/updateNode', {
         method: 'POST',
         body: formData
       })
           .then(response => {
             if (response.ok) {
-              this.fetchNodeList();
+              this.getSubNodes(this.selectedNode.remark);
               console.log('Update successful');
             } else {
               console.error('Update failed');
@@ -257,7 +256,6 @@ export default {
           .catch(error => {
             console.error('Error:', error);
           });
-
       this.closeDrawer();
     },
     selectNode(node) {
@@ -442,13 +440,13 @@ export default {
       this.newSubNodePort = '';
       this.showAddSubForm = false;
     },
-    delete_sub() {
-      this.showDeleteForm = true;
-    },
-    confirmDelete() {
+    // delete_sub() {
+    //   this.showDeleteForm = true;
+    // },
+    confirmDelete(subNode) {
       const formData = new FormData();
       formData.append('parent', this.selectedNode.remark);
-      formData.append('address', this.deleteAddress);
+      formData.append('address', subNode);
 
       fetch('http://localhost:8081/removeAddress', {
         method: 'POST',
@@ -460,7 +458,6 @@ export default {
               this.showDeleteForm = false;
               this.getSubNodes(this.selectedNode.remark);
               this.nodeDetails();
-
             } else {
               console.error('Failed.');
             }
@@ -469,10 +466,10 @@ export default {
             console.error('Error:', error);
           });
     },
-    cancelDelete() {
-      this.showDeleteForm = false;
-      this.deleteAddress = '';
-    },
+    // cancelDelete() {
+    //   this.showDeleteForm = false;
+    //   this.deleteAddress = '';
+    // },
     clear_sub(){
       const formData = new FormData();
       formData.append('parent', this.selectedNode.remark);
