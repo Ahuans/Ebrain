@@ -88,8 +88,10 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-image: linear-gradient(to bottom, white, lightblue, blue);
+  background-image: linear-gradient(42deg, #374fe8, #8480e3, #b3b4dc, #d8ead3);
 }
+
+
 
 .login-box {
   border-radius: 10px;
@@ -98,7 +100,6 @@ export default {
   background-color: white;
   color: black;
   width: 400px;
-  border: 4px solid rgba(78, 78, 165, 0.82);
 }
 
 .form-group {

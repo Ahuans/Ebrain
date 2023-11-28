@@ -100,7 +100,7 @@
 <!--          <br>-->
   <!--        <el-button type="primary" @click="connectNode">Connect</el-button>-->
           <el-button type="primary" @click="add_sub">Add Sub Node</el-button>
-          <el-button type="primary" @click="delete_sub">Delete Sub Node</el-button>
+<!--          <el-button type="primary" @click="delete_sub">Delete Sub Node</el-button>-->
           <el-button type="primary" @click="clear_sub">Delete All Sub Node</el-button>
           <br><br>
           <div v-if="showAddSubForm" class="add-sub-form">
