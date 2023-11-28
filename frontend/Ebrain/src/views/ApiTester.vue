@@ -168,7 +168,7 @@ export default {
             restBody: body
           }
         })
-        tabInfo.result = ParseData(response.data.header['content-type'],response.data.data)
+        tabInfo.result = ParseData(response.data.header,response.data.data)
         //result.value = response.data.data
         console.log(tabInfo.result)
       } catch (error) {
@@ -185,7 +185,7 @@ export default {
      */
     function ParseData(format,data) {
       //todo
-      format = format.match('\/{1}([a-zA-Z]*)')[0]
+      //format = format.match('\/{1}([a-zA-Z]*)')[0]
       console.log("format")
       console.log(format)
       //html

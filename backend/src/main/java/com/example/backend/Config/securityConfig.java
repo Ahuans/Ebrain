@@ -59,6 +59,7 @@ public class securityConfig {
                 .successHandler((req, resp, authentication) -> {
 
                     Object principal = authentication.getPrincipal();
+                    System.out.println(authentication.getPrincipal());
                     resp.setContentType("application/json;charset=utf-8");
                     PrintWriter out = resp.getWriter();
                     out.write(new ObjectMapper().writeValueAsString(principal));
@@ -70,10 +71,11 @@ public class securityConfig {
                 .failureHandler(new AuthenticationFailureHandler() {
                     @Override
                     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         Map<String, String> errorResponse = new HashMap<>();
                         errorResponse.put("enable", "false");
                         errorResponse.put("error","Invalid username or password");
-                        String json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(errorResponse);
+                        String json = new ObjectMapper().writeValueAsString(errorResponse);
 
 
                         response.setContentType("application/json");
